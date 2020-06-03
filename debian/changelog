@@ -1,3 +1,10 @@
+printa (1:0.2) bionic; urgency=medium
+
+  * Added links to /usr/bin
+  * Added xdg autostart for printa-client GUI
+
+ -- Hector Garcia Huerta <hectorgh@gmail.com>  Wed, 03 Jun 2020 14:03:21 +0200
+
 printa (1:0.1.2) bionic; urgency=medium
 
   * Fixed missing install file for printa-client
