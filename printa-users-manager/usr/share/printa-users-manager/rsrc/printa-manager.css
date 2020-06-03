@@ -1,0 +1,11 @@
+#BORDERLESS_BUTTON{
+			
+	border: 0px;
+	background: transparent;
+	border-radius: 0%;
+	box-shadow: none;
+	}
+			
+#BORDERLESS_BUTTON:hover{
+	background: #93CEE9
+	}

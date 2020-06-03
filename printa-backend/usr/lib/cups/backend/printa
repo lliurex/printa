@@ -1,0 +1,294 @@
+#!/usr/bin/python3
+
+import sys
+import os
+import time
+import subprocess
+import imp
+import syslog
+import random
+import multiprocessing
+
+
+DEBUG=True
+SYSLOG=True
+CUPS_BACKEND_PATH="/usr/lib/cups/backend/"
+CUPS_POOL_PATH="/var/spool/cups/"
+RUN_PATH="/run/printa/"
+PRINT_TIMEOUT=10
+
+def dprint(msg):
+	
+	global DEBUG
+	global SYSLOG
+	
+	if DEBUG:
+		if SYSLOG:
+			syslog.syslog("[PRINTA] %s"%msg)
+		else:
+			print("[PRINTA] %s"%msg)
+			
+#def dprint
+
+class PrintaBackend:
+	
+	def __init__(self):
+		
+		try:
+			if not os.path.exists(RUN_PATH):
+				os.makedirs(RUN_PATH)
+			
+		except Exception as e:
+			dprint(e)
+			os.system("mkdir %s"%RUN_PATH)
+			os.mkdir(RUN_PATH)
+		
+		N4dManager=imp.load_source("N4dManager","/usr/share/printa/N4dManager.py")		
+		self.n4d=N4dManager.N4dManager()
+		
+	#def __init__
+	
+		
+	def get_pages(self,job_id):
+
+		dprint("Trying to get number of pages...")
+		for f in os.listdir(CUPS_POOL_PATH):
+
+			if job_id+"-" in f:
+				file_path=CUPS_POOL_PATH+f
+				
+				p=subprocess.Popen(["file",file_path],stdout=subprocess.PIPE)
+				output=p.communicate()[0]
+				output=output.decode("utf-8")
+				output=output.strip("\n")
+				
+				dprint(output)
+
+				if "PostScript" in output:
+					os.system("ps2pdf %s /tmp/.%s"%(file_path,f))
+					file_path="/tmp/."+f
+					
+				if "gzip" in output:
+					os.system("gzip -fcd %s > /tmp/.%s"%(file_path,f))
+					file_path="/tmp/."+f
+				
+				dprint(file_path)
+				
+				p=subprocess.Popen(["pdfinfo",file_path],stdout=subprocess.PIPE)
+				output=p.communicate()[0]
+				output=output.decode("utf-8")
+				output=output.split("\n")
+
+				os.remove(file_path)
+				for line in output:
+					if "Pages:" in line:
+						return int(line.split(" ")[-1])
+						
+		dprint("[!] Couldn't guess number of pages, returning 1")
+		return 1
+		
+	#def get_pages
+	
+
+	def prepare_job(self,args):
+		
+		dprint("Preparing job %s"%args)
+		
+		try:
+			
+			uri=os.environ["DEVICE_URI"]
+			os.environ["DEVICE_URI"]=uri.replace("printa:","")
+			
+			info={}
+			info["job"]=args[1]
+			info["user"]=args[2]
+			info["job_name"]=args[3]
+			info["copies"]=int(args[4])
+			info["printer_name"]=os.environ["PRINTER"]
+			info["printer"]=os.environ["DEVICE_URI"]
+			info["time"]=round(time.time(),2)
+			info["backend"]=CUPS_BACKEND_PATH+info["printer"].split(":")[0]
+			info["args"]=[info["printer"].replace("printa:","")]+args[1:]
+			info["status"]="waiting"
+			
+			iargs={}
+			for item in args[5].split(" "):
+				try:
+					key,value=item.split("=")
+					iargs[key]=value
+				except:
+					iargs[item]=None
+
+			if "job-uuid" in iargs:
+				info["id"]=iargs["job-uuid"]
+			else:
+				info["id"]=str(int(random.random()*1000000000000))
+				
+			if "job-originating-host-name" in iargs:
+				info["origin"]=iargs["job-originating-host-name"]
+			else:
+				info["origin"]="127.0.0.1"
+				
+			if info["origin"]=="localhost":
+				info["origin"]="127.0.0.1"
+			
+			try:
+				info["pages"]=self.get_pages(info["job"])*info["copies"]
+			except Exception as e:
+				dprint(e)
+				info["pages"]=1
+			
+			# by default we assume color
+			info["color-mode"]="color"
+			
+			known_colormode_keys=["ColorModel","ColorType","Ink"]
+			known_gray_values=["GrayScale","Gray","Black","Mono","Grey","GreyScale"]
+			known_color_values=["CMY","CMYK","KCMY","RGB"]
+			
+			for mode in known_colormode_keys:
+				if mode in iargs:
+					for gray in known_gray_values:
+						if iargs[mode].lower()==gray.lower():
+							info["color-mode"]="gray"
+							break
+					for color in known_color_values:
+						if iargs[mode].lower()==color.lower():
+							info["color-mode"]="color"
+							break
+					break
+			
+			self.create_token(info["id"],info["time"])
+			
+			for key in info:
+				dprint("%s: %s"%(key,info[key]))
+	
+			return info
+			
+		except Exception as e:
+			dprint("Preparing job failed: %s"%e)
+			return None
+		
+	#def prepare_job
+	
+	def create_token(self,id,timestamp):
+		
+		try:
+			f=open(RUN_PATH+id,"w")
+			f.write(str(timestamp))
+			f.close()
+		except Exception as e:
+			dprint(e)
+		
+	#def create_token
+	
+	def delete_token(self,id):
+		
+		path=RUN_PATH+id
+		if os.path.exists(path):
+			os.remove(path)
+		
+	#def delete_token
+	
+	def child_print_process(self,backend,args):
+
+		m=multiprocessing.Process(target=self._print_process,args=(backend,args,))
+		m.daemon=True
+		m.start()
+		m.join()
+		
+	#def print_process
+	
+	def _print_process(self,backend,args):
+
+		os.execv(backend,args)
+		
+	#def print_process
+	
+	
+#class PrintaBackend
+
+if __name__=="__main__":
+
+	try:
+		pb=PrintaBackend()
+		dprint(pb.n4d.printa_server)
+		
+	except Exception as e:
+		dprint("Error!")
+		dprint(e)
+		sys.exit(1)
+		
+	info=pb.prepare_job(sys.argv)
+	id=None
+	
+	try:
+		
+		msg={}
+		msg["msg_type"]=1
+		msg["error_type"]=None
+		msg["callback"]=None
+		msg["job_info"]=info
+
+		ret=pb.n4d.add_request(info["origin"],info["user"],msg)
+		
+		for item in os.environ:
+			dprint("%s = %s"%(item,os.environ[item]))
+		
+		dprint("")
+		dprint("Printing...")
+		dprint(info["backend"])
+		dprint(info["args"])
+		dprint("")
+		dprint("")
+		dprint(ret)
+		dprint("")
+		dprint("")
+
+
+		waiting=True
+		t=0
+		got_ok=False
+		found=False
+		
+		while waiting:
+			try:
+				current_status="waiting"
+				ret=pb.n4d.get_request_status(info["id"])
+				dprint(ret)
+				
+				if ret["status"]:
+					current_status=ret["msg"]
+					
+					if current_status == "completed":
+						dprint("Got ok from client. Printing...")
+						got_ok=True
+						break
+					elif current_status == "cancelled":
+						dprint("Cancelling job...")
+						break
+			except Exception as e:
+				dprint(e)
+			
+			if t < PRINT_TIMEOUT:
+				t+=2
+				dprint("Waiting for response...")
+				time.sleep(3)
+			else:
+				break
+				
+		#end while
+
+		if got_ok:
+			try:
+				pb.child_print_process(info["backend"],info["args"])
+				pb.delete_token(info["id"])
+			except Exception as e:
+				dprint(e)
+			
+		dprint("Done")
+		
+	except Expcetion as e:
+		dprint("STEP ERROR")
+		dprint(e)
+		
+	sys.exit(0)

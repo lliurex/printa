@@ -1,0 +1,949 @@
+#!/usr/bin/env python3
+
+import gi
+gi.require_version('Gtk', '3.0')
+from gi.repository import Gtk, Gdk, GObject,Gio,GLib
+import os
+import sys
+import pwd
+import time
+import syslog
+
+import N4dManager
+
+import signal
+signal.signal(signal.SIGINT, signal.SIG_DFL)
+
+import gettext
+_=gettext.gettext
+gettext.textdomain('printa')
+
+RSRC_PATH="./"
+MENU_ICON_SIZE=Gtk.IconSize.LARGE_TOOLBAR
+MENU_TEXT_FONT="Noto Sans 10"
+
+DEBUG=True
+SYSLOG=False
+
+def dprint(data):
+	if DEBUG:
+		print("[Printa-Manager] %s"%data)
+	if SYSLOG:
+		syslog.syslog("[N4dManager] %s"%data)
+
+class PrintaManager:
+	
+	def __init__(self,server):
+		
+		self.n4d=N4dManager.N4dManager()
+
+		self.n4d.login.run()
+		if self.n4d.login.ticket==None:
+			sys.exit(0)
+			
+		self.n4d.set_auth(self.n4d.login.user,self.n4d.login.ticket)
+		self.sm_sections=[["actor","User Management\t","user_management",MENU_ICON_SIZE,MENU_TEXT_FONT],["user-group-new","Group operations\t","group_operations",MENU_ICON_SIZE,MENU_TEXT_FONT],["appointment-new","Auto-refill options\t","autorefill_options",MENU_ICON_SIZE,MENU_TEXT_FONT]]
+		
+		self.current_user=None
+		self.check_changes={}
+		self.check_changes["user_management"]=self.check_um_changes
+		self.check_changes["group_operations"]=self.check_go_changes
+		self.check_changes["autorefill_options"]=self.check_ao_changes
+		self.save_changes={}
+		self.save_changes["user_management"]=self.save_um_changes
+		self.save_changes["group_operations"]=self.save_go_changes
+		self.save_changes["autorefill_options"]=self.save_ao_changes
+		
+		self.build_gui()
+		
+	#def __init__
+	
+	def format_time(self,t):
+
+		format_str="%H:%M:%S - %d/%m/%Y"
+		return time.strftime(format_str,time.localtime(t))
+
+        #def _format_time
+
+	def create_column(self,column_name,attr_pos,expand=False):
+		
+		column=Gtk.TreeViewColumn(column_name)
+		renderer=Gtk.CellRendererText()
+		column.pack_start(renderer,True)
+		column.add_attribute(renderer,"text",attr_pos)
+		column.set_expand(expand)
+		return column
+		
+	#def create_txt_column 
+	
+
+	
+	def build_gui(self):
+		
+		builder=Gtk.Builder()
+		builder.set_translation_domain("printa")
+		builder.add_from_file(RSRC_PATH+"printa-manager.ui")
+		
+		self.main_window=builder.get_object("main_window")
+		self.mw_box=builder.get_object("mw_box")
+		self.mw_content_box=builder.get_object("mw_content_box")
+		self.mw_bottom_box=builder.get_object("mw_bottom_box")
+		self.sm_treeview=builder.get_object("sm_treeview")
+		self.welcome_box=builder.get_object("welcome_box")
+		self.side_menu=builder.get_object("side_menu")
+		self.apply_button=builder.get_object("apply_button")
+		
+		self.user_details_box=builder.get_object("user_details_box")
+		self.um_side_menu_box=builder.get_object("um_side_menu_box")
+		self.um_back_button=builder.get_object("um_back_button")
+		self.um_treeview=builder.get_object("um_treeview")
+		self.um_history_treeview=builder.get_object("um_history_treeview")
+		self.um_search_entry=builder.get_object("um_search_entry")
+		self.um_locked_cb=builder.get_object("um_locked_cb")
+		self.um_freepass_cb=builder.get_object("um_freepass_cb")
+		
+		self.go_box=builder.get_object("go_box")
+		self.go_side_menu_box=builder.get_object("go_side_menu_box")
+		self.go_back_button=builder.get_object("go_back_button")
+		self.go_treeview=builder.get_object("go_treeview")
+		self.go_search_entry=builder.get_object("go_search_entry")
+		self.go_groups_combo=builder.get_object("go_group_combo")
+		self.go_flag_combo=builder.get_object("go_flag_combo")
+		self.go_new_quota_sb=builder.get_object("go_new_quota_sb")
+		self.go_add_quota_sb=builder.get_object("go_add_quota_sb")
+		self.go_add_quota_button=builder.get_object("go_add_quota_button")
+		self.go_new_quota_button=builder.get_object("go_new_quota_button")
+		self.go_flag_button=builder.get_object("go_flag_button")
+		
+		self.ao_box=builder.get_object("autorefill_options_box")
+		self.ao_enabled_cb=builder.get_object("ao_enabled_cb")
+		self.ao_months_sb=builder.get_object("ao_months_sb")
+		self.ao_days_sb=builder.get_object("ao_days_sb")
+		self.ao_side_menu_box=builder.get_object("ao_side_menu_box")
+		self.ao_back_button=builder.get_object("ao_back_button")
+		self.ao_amount_sb=builder.get_object("ao_amount_sb")
+		self.ao_last_set_label=builder.get_object("ao_last_set_label")
+		
+		self.um_uid_entry=builder.get_object("um_uid_entry")
+		self.um_name_entry=builder.get_object("um_name_entry")
+		self.um_quota_spinbutton=builder.get_object("um_quota_spinbutton")
+		
+		adjustment=Gtk.Adjustment(0,0,1000,1,10,0)
+		self.um_quota_spinbutton.set_adjustment(adjustment)
+		adjustment=Gtk.Adjustment(0,0,1000,1,10,0)
+		self.go_new_quota_sb.set_adjustment(adjustment)
+		adjustment=Gtk.Adjustment(0,-1000,1000,1,10,0)
+		self.go_add_quota_sb.set_adjustment(adjustment)
+		adjustment=Gtk.Adjustment(0,0,12,1,10,0)
+		self.ao_months_sb.set_adjustment(adjustment)
+		adjustment=Gtk.Adjustment(0,0,30,1,10,0)
+		self.ao_days_sb.set_adjustment(adjustment)
+		adjustment=Gtk.Adjustment(0,-1000,1000,1,10,0)
+		self.ao_amount_sb.set_adjustment(adjustment)
+		
+		self.main_stack=Gtk.Stack()
+		self.main_stack.add_titled(self.welcome_box,"home","Home")
+		self.main_stack.add_titled(self.user_details_box,"user_management","User Management")
+		self.main_stack.add_titled(self.go_box,"group_operations","Group operations")
+		self.main_stack.add_titled(self.ao_box,"autorefill_options","AF options")
+		
+		self.side_stack=Gtk.Stack()
+		self.side_stack.set_transition_duration(500)
+		self.side_stack.set_transition_type(Gtk.StackTransitionType.SLIDE_LEFT_RIGHT)
+		self.side_stack.add_titled(self.side_menu,"home","Main Menu")
+		self.side_stack.add_titled(self.um_side_menu_box,"user_management","UM Menu")
+		self.side_stack.add_titled(self.go_side_menu_box,"group_operations","GO Menu")
+		self.side_stack.add_titled(self.ao_side_menu_box,"autorefill_options","AF Menu")
+		
+		self.mw_box.pack_start(self.side_stack,False,False,0)
+		self.mw_content_box.pack_start(self.main_stack,True,True,0)
+		
+		self.msg_stack=Gtk.Stack()
+		self.msg_stack.set_transition_duration(500)
+		self.msg_stack.set_transition_type(Gtk.StackTransitionType.CROSSFADE)
+		self.msg_label=Gtk.Label()
+		self.msg_label.show()
+		empty_box=Gtk.Box()
+		empty_box.show()
+		self.msg_stack.add_titled(empty_box,"empty","E")
+		self.msg_stack.add_titled(self.msg_label,"msg_label","M")
+		self.mw_bottom_box.pack_start(self.msg_stack,True,True,0)
+		
+		self.um_back_button.get_children()[0].set_alignment(0,0.5)
+		self.go_back_button.get_children()[0].set_alignment(0,0.5)
+		self.ao_back_button.get_children()[0].set_alignment(0,0.5)
+		
+		self.build_side_main_menu()
+		self.build_um_side_menu()
+		self.build_um_history_treeview()
+		
+		self.build_go_menus()
+		
+		self.connect_signals()
+		self.set_css_info()
+		self.main_window.show_all()
+		self.apply_button.set_sensitive(False)
+		
+		self.run()
+		
+	#def build_gui
+	
+	def run(self):
+		
+		GObject.threads_init()
+		Gtk.main()
+		
+	#def run
+
+	def set_mw_success_msg(self,msg):
+		
+		markup_skel="<span foreground='#3daee9'>%s</span>"
+		self.set_mw_msg(markup_skel%msg)
+		
+	#def set_mw_success_msg
+
+	def set_mw_error_msg(self,msg):
+		
+		markup_skel="<span foreground='red'>%s</span>"
+		self.set_mw_msg(markup_skel%msg)
+		
+	#def set_mw_error_msg
+	
+	def set_mw_msg(self,msg):
+		
+		def hide_msg():
+			
+			self.msg_stack.set_visible_child_name("empty")
+			return False
+		
+		self.msg_label.set_markup(msg)
+		self.msg_stack.set_visible_child_name("msg_label")
+		GLib.timeout_add(3500,hide_msg)
+		
+	#def set_mw_msg
+	
+	def reset_um_widgets(self):
+		
+		self.um_uid_entry.set_text("")
+		self.um_name_entry.set_text("")
+		self.um_quota_spinbutton.set_value(0)
+		self.um_locked_cb.set_active(False)
+		self.um_freepass_cb.set_active(False)
+		self.um_history_liststore.clear()
+		self.current_user=None
+		self.set_um_widgets_sensitive(False)
+		
+	#def reset_um_widgets
+
+	def set_um_widgets_sensitive(self,state):
+		
+		l=[self.um_locked_cb,self.um_freepass_cb,self.um_quota_spinbutton]
+		
+		for widget in l:
+			widget.set_sensitive(state)
+			
+	#def set_um_widgets_sensitive
+	
+	def reset_go_widgets(self):
+		
+		self.go_new_quota_sb.set_value(200)
+		self.go_add_quota_sb.set_value(0)
+		self.go_flag_combo.set_active(0)
+
+	#def reset_go_widgets
+			
+	def set_ao_widgets_sensitive(self,state):
+		
+		l=[self.ao_months_sb,self.ao_days_sb,self.ao_amount_sb]
+		
+		for widget in l:
+			widget.set_sensitive(state)
+			
+	#def set_ao_widgets_sensitive
+	
+	def set_css_info(self):
+		
+		self.style_provider=Gtk.CssProvider()
+		f=Gio.File.new_for_path(RSRC_PATH+"printa-manager.css")
+		self.style_provider.load_from_file(f)
+		Gtk.StyleContext.add_provider_for_screen(Gdk.Screen.get_default(),self.style_provider,Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION)
+		self.um_back_button.set_name("BORDERLESS_BUTTON")
+		self.go_back_button.set_name("BORDERLESS_BUTTON")
+		self.ao_back_button.set_name("BORDERLESS_BUTTON")
+		
+	#def set-css_info	
+	
+	def build_side_main_menu(self):
+		
+		self.sm_liststore=Gtk.ListStore(str,str,str,int,str)
+		for item in self.sm_sections:
+			self.sm_liststore.append(item)
+			
+		self.sm_treeview.set_model(self.sm_liststore)
+		icon_renderer=Gtk.CellRendererPixbuf()
+		icon_column=Gtk.TreeViewColumn("Image",icon_renderer,icon_name=0)
+		icon_column.add_attribute(icon_renderer,"stock-size",3)
+		icon_column.set_expand(False)
+		self.sm_treeview.append_column(icon_column)
+		
+		text_renderer=Gtk.CellRendererText()
+		text_column=Gtk.TreeViewColumn("Text",text_renderer,text=1)
+		text_column.add_attribute(text_renderer,"font",4)
+		text_column.set_expand(False)
+		self.sm_treeview.append_column(text_column)
+		
+	#def build_side_main_menu
+	
+	def build_um_side_menu(self):
+		
+		self.users_liststore=Gtk.ListStore(int,str)
+		self.um_treeview.set_model(self.users_liststore)
+		column=Gtk.TreeViewColumn("UID")
+		renderer=Gtk.CellRendererText()
+		column.pack_start(renderer,True)
+		column.add_attribute(renderer,"text",0)
+		column.set_expand(False)
+		self.um_treeview.append_column(column)
+		column=Gtk.TreeViewColumn(_("Name"))
+		renderer=Gtk.CellRendererText()
+		column.pack_start(renderer,True)
+		column.add_attribute(renderer,"text",1)
+		self.um_treeview.append_column(column)		
+		
+	#def build_um_side_menu
+	
+	def build_um_history_treeview(self):
+		
+		self.um_history_liststore=Gtk.ListStore(str,str,str,str,str)
+		self.um_history_treeview.set_model(self.um_history_liststore)
+		column=self.create_column("Date",0)
+		self.um_history_treeview.append_column(column)
+		column=self.create_column("Name",1)
+		self.um_history_treeview.append_column(column)
+		column=self.create_column("Printer",2)
+		self.um_history_treeview.append_column(column)
+		column=self.create_column("Copies",3)
+		self.um_history_treeview.append_column(column)
+		column=self.create_column("Pages",4)
+		self.um_history_treeview.append_column(column)
+		
+	#def  build_um_history_treeview
+	
+	def build_go_menus(self):
+		
+		self.go_users_liststore=Gtk.ListStore(str)
+		self.go_treeview.set_model(self.go_users_liststore)
+		column=Gtk.TreeViewColumn(_("User list"))
+		renderer=Gtk.CellRendererText()
+		column.pack_start(renderer,True)
+		column.set_expand(False)
+		column.add_attribute(renderer,"text",0)
+		self.go_treeview.append_column(column)
+		
+		self.go_groups_liststore=Gtk.ListStore(str)
+		self.go_groups_combo.set_model(self.go_groups_liststore)
+		renderer=Gtk.CellRendererText()
+		self.go_groups_combo.pack_start(renderer,True)
+		self.go_groups_combo.add_attribute(renderer,"text",0)
+		
+		self.go_flag_ls=Gtk.ListStore(int,str)
+		self.go_flag_combo.set_model(self.go_flag_ls)
+		renderer=Gtk.CellRendererText()
+		self.go_flag_combo.pack_start(renderer,True)
+		self.go_flag_combo.add_attribute(renderer,"text",1)
+		
+		self.go_flag_ls.append([0,"No flags"])
+		self.go_flag_ls.append([1,"Locked"])
+		self.go_flag_ls.append([2,"Free pass"])
+		self.go_flag_combo.set_active(0)
+		
+	#def build_um_side_menu
+	
+	def populate_um_history_treeview(self):
+		
+		self.um_history_liststore.clear()
+		if self.current_user!=None and "history" in self.current_user :
+			l=[]
+			for item in self.current_user["history"]:
+
+				job_name=item["job_name"]
+				if "estimated_pages"in item:
+					pages=str(item["estimated_pages"])
+				else:
+					pages=str(item["pages"])
+				copies=str(item["copies"])
+				printer_name=item["printer_name"]
+				date=time.strftime("%d/%m/%y", time.localtime(int(item["time"])))
+				l.append([date,job_name,printer_name,copies,pages])
+		
+			# Last to first printed job
+			for item in reversed(l):
+				self.um_history_liststore.append(item)
+		
+	#def populate_um_history_treeview
+	
+	def populate_um_treeview(self,filter=""):
+		
+		if filter=="":
+			self.user_list=self.n4d.get_user_list()
+		
+		# Clearing list kicks cursor-changed signal, so we block it before doing so
+		self.um_treeview.handler_block(self.um_treeview_handler)
+		self.um_treeview.get_selection().unselect_all()
+		self.users_liststore.clear()
+		self.um_treeview.handler_unblock(self.um_treeview_handler)
+		
+		try:
+			for user in self.user_list:
+				uid=user["uid"]
+				name=user["name"]
+				if filter!="":
+					if filter in str(uid)or filter in name:
+						self.users_liststore.append((uid,name))
+				else:
+					self.users_liststore.append((uid,name))
+					
+		except Exception as e:
+			dprint(e)
+		
+	#def populate_um_treeview
+	
+	def populate_go_combo(self):
+		
+		self.go_groups_liststore.clear()
+		
+		try:
+			self.current_groups=self.n4d.get_group_list()
+			for group in self.current_groups:
+				self.go_groups_liststore.append([group["name"]])
+			
+			if len(self.current_groups)>0:
+				self.go_groups_combo.set_active(0)
+
+		except Exception as e:
+			dprint(e)
+		
+	#def populate_go_combo
+	
+	def populate_ao_box(self):
+		
+		self.ao_options=self.n4d.get_autorefill_options()
+		if self.ao_options==None:
+			return
+
+		enabled=self.ao_options["enabled"]
+		# Period already in days. Fixed by N4dManager class
+		period=self.ao_options["period"]
+		amount=self.ao_options["amount"]
+		last_set=self.ao_options["last_set"]
+		
+		if period!=0:
+			months=int(period/31)
+			days=int(period%31)
+		else:
+			months=0
+			days=0
+		self.ao_months_sb.set_value(months)
+		self.ao_days_sb.set_value(days)
+		
+		self.ao_amount_sb.set_value(amount)
+		
+		label_str=""
+		if last_set!=None:
+			str_time=self.format_time(last_set)
+			label_str="Last update: %s"%str_time
+		self.ao_last_set_label.set_text(label_str)
+		
+		self.ao_enabled_cb.set_active(enabled)
+		self.set_ao_widgets_sensitive(enabled)
+		
+	#def populate_ao_box
+
+	def get_ao_current_values(self):
+
+		current_amount=int(self.ao_amount_sb.get_value())
+		current_month=int(self.ao_months_sb.get_value())
+		current_day=int(self.ao_days_sb.get_value())
+		# Period in days
+		current_period=current_day + current_month*31
+		current_status=self.ao_enabled_cb.get_active()
+		
+		ret={}
+		ret["amount"]=current_amount
+		ret["period"]=current_period
+		ret["enabled"]=current_status
+
+		return ret
+		
+	#def get_ao_current_values
+
+
+	def connect_signals(self):
+		
+		self.main_window.connect("destroy",Gtk.main_quit)
+		self.main_window.connect("delete-event",self.delete_event)
+		self.sm_treeview.connect("cursor-changed",self.side_menu_selection_changed)
+		self.um_treeview_handler=self.um_treeview.connect("cursor-changed",self.um_user_selection_changed)
+		self.um_back_button.connect("clicked",self.back_button_clicked,"user_management")
+		self.um_search_entry.connect("changed",self.um_search_changed)
+		self.um_quota_spinbutton.connect("changed",self.um_quota_changed)
+		self.apply_button.connect("clicked",self.apply_clicked)
+		self.um_locked_cb.connect("clicked",self.um_cb_changed,1)
+		self.um_freepass_cb.connect("clicked",self.um_cb_changed,2)
+		self.go_back_button.connect("clicked",self.back_button_clicked,"group_operations")
+		self.go_groups_combo.connect("changed",self.go_groups_combo_changed)
+		self.go_treeview.connect("cursor-changed",self.go_treeview_changed)
+		self.go_search_entry.connect("changed",self.go_search_changed)
+		self.go_new_quota_button.connect("clicked",self.go_new_quota_clicked)
+		self.go_add_quota_button.connect("clicked",self.go_add_quota_clicked)
+		self.go_flag_button.connect("clicked",self.go_flag_clicked)
+		self.ao_back_button.connect("clicked",self.back_button_clicked,"autorefill_options")
+		self.ao_enabled_cb.connect("clicked",self.ao_enabled_changed)
+		self.ao_amount_sb.connect("changed",self.ao_spinbuttons_changed)
+		self.ao_months_sb.connect("changed",self.ao_spinbuttons_changed)
+		self.ao_days_sb.connect("changed",self.ao_spinbuttons_changed)
+		
+	#def connect_signals
+	
+	# MAIN WINDOW SIGNALS
+	
+	def apply_clicked(self,widget):
+		
+		current_stack=self.main_stack.get_visible_child_name()
+		if current_stack != "home":
+			if self.save_changes[current_stack]():
+				widget.set_sensitive(False)
+		
+	#def apply_clicked
+	
+	def side_menu_selection_changed(self,widget):
+		
+		path=widget.get_selection().get_selected_rows()[1]
+		stack_name=self.sm_liststore[path][2]
+		self.change_main_stack(stack_name)
+		
+	#def side_menu_selection_changed
+	
+	def back_button_clicked(self,button,current_stack):
+		
+		self.change_main_stack("home")
+		
+	#def back_button
+	
+	
+	def delete_event(self,widget,event):
+		
+		current_stack=self.main_stack.get_visible_child_name()
+		
+		if current_stack !="home":
+			ret=self.check_changes[current_stack]()
+			if ret:
+				ret=self.save_dialog()
+				if ret==Gtk.ResponseType.OK:
+					#dprint("Apply changes and keep window open")
+					self.apply_clicked(self.apply_button)
+					# lets not close app window for now. let user do it
+					return True
+				if ret==Gtk.ResponseType.CLOSE:
+					#dprint("Discard changes and exit")
+					pass
+				if ret==Gtk.ResponseType.CANCEL:
+					#dprint("Cancel delete window event")
+					return True
+		
+		Gtk.main_quit()
+		
+	#def delete_event
+	
+	# ########################### #
+	
+	# USER MANAGER SIGNALS
+	
+	def um_cb_changed(self,cb,id):
+		
+		if self.um_locked_cb.get_active() and self.um_freepass_cb.get_active():
+			if id==1:
+				self.um_freepass_cb.set_active(False)
+			else:
+				self.um_locked_cb.set_active(False)
+				
+		if self.check_um_changes():
+			if not self.apply_button.get_sensitive():
+				self.apply_button.set_sensitive(True)
+		
+	#def um_cb_changed
+	
+	def um_search_changed(self,widget):	
+		
+		filter=self.um_search_entry.get_text()
+		self.populate_um_treeview(filter)
+		
+	#def um_search_changed
+
+	def um_user_selection_changed(self,widget,event=None):
+		
+		self.current_user=None
+		uid=""
+		user=""
+		quota=0
+		locked=False
+		freepass=False
+		path=widget.get_selection().get_selected_rows()[1]
+
+		if len(path)!=0:
+			user=self.users_liststore[path][1]
+			uid=self.users_liststore[path][0]
+			user_info=self.n4d.get_user_info(user)
+			quota=user_info["quota"]["default"]
+			freepass=user_info["free_pass"]
+			locked=user_info["locked"]
+			self.current_user=user_info
+			self.current_user["user"]=user
+			self.current_user["uid"]=uid
+			self.apply_button.set_sensitive(False)
+			self.set_um_widgets_sensitive(True)
+		
+		self.um_uid_entry.set_text(str(uid))
+		self.um_name_entry.set_text(user)
+		self.um_quota_spinbutton.set_value(quota)
+		self.um_locked_cb.set_active(locked)
+		self.um_freepass_cb.set_active(freepass)
+		
+		self.populate_um_history_treeview()
+		
+	#def um_user_selection_changed
+	
+	def um_quota_changed(self,widget):
+		
+		if self.current_user==None:
+			return
+		
+		current_quota=int(widget.get_value())
+		
+		if current_quota!=self.current_user["quota"]["default"]:
+			if not self.apply_button.is_sensitive():
+				self.apply_button.set_sensitive(True)
+				
+	#def um_quota_changed
+	
+	# #####################
+	
+	# GROUP OPTIONS SIGNALS
+	
+	def go_new_quota_clicked(self,button):
+		
+		group=self.go_get_current_group()
+		quota=int(self.go_new_quota_sb.get_value())
+		ret=self.n4d.set_group_quota(group,quota)
+		
+		if ret:
+			self.set_mw_success_msg("Quota applied")
+		else:
+			self.set_mw_error_msg("Failed to apply quota")
+		
+	#def go_new_quota_clicked
+	
+	def go_add_quota_clicked(self,button):
+		
+		group=self.go_get_current_group()
+		add_value=int(self.go_add_quota_sb.get_value())
+
+		ret=self.n4d.add_to_group_quota(group,add_value)
+		if ret:
+			self.set_mw_success_msg("Quota added")
+		else:
+			self.set_mw_error_msg("Failed to add quota")
+		
+	#def go_add_quota_clicked
+	
+	def go_flag_clicked(self,button):
+		
+		group=self.go_get_current_group()
+		
+		id=self.go_flag_combo.get_active()
+		selection=self.go_flag_ls[id][0]
+		locked=False
+		freepass=False
+		if selection==1:
+			locked=True
+		if selection==2:
+			freepass=True
+			
+		ret=self.n4d.set_group_flag(group,locked,freepass)
+		if ret:
+			self.set_mw_success_msg("Flags applied")
+		else:
+			self.set_mw_error_msg("Failed to apply flags")
+		
+	#def go_flag_clicked
+	
+	def go_get_current_group(self):
+		
+		iter=self.go_groups_combo.get_active_iter()
+		if iter!=None:
+			return self.go_groups_liststore[iter][0]
+		return None
+		
+	#def go_get_current_group
+	
+	def go_treeview_changed(self,tv):
+		
+		# We don't want user to be able to select any row. It is just used to display data
+		tv.get_selection().unselect_all()
+		return True
+		
+	#def go_treeview_changed
+	
+	def go_search_changed(self,sentry):
+		
+		group=sentry.get_text()
+		if len(group) < 3:
+			return
+
+		i=0
+		for g in self.current_groups:
+			if group in g["name"]:
+				if self.go_groups_combo.get_active()!=i:
+					self.go_groups_combo.set_active(i)
+				return
+			i+=1
+			
+	#def go_search_entry_changed
+	
+	def go_groups_combo_changed(self,cb):
+		
+		iter=cb.get_active_iter()
+		if iter!=None:
+			group=self.go_groups_liststore[iter][0]
+			current_group=self.current_groups[self.go_groups_combo.get_active()]
+			self.go_users_liststore.clear()
+			for member in current_group["members"]:
+				self.go_users_liststore.append([member])
+			if self.go_search_entry.get_text() not in group:
+				self.go_search_entry.set_text("")
+		
+	#def go_groups_comobo_changed
+	
+	# ####################
+	
+	# AUTO-REFILL OPTIONS SIGNALS
+	
+	def ao_enabled_changed(self,cb):
+		
+		state=cb.get_active()
+		self.set_ao_widgets_sensitive(state)
+		
+		if self.check_ao_changes():
+			if not self.apply_button.get_sensitive():
+				self.apply_button.set_sensitive(True)
+				
+	#def ao_enabled_changed
+	
+	def ao_spinbuttons_changed(self,sb):
+		
+		if not self.apply_button.get_sensitive():
+			if self.check_ao_changes():
+				self.apply_button.set_sensitive(True)
+		
+	#def 
+	
+	# ##################################
+	
+	# PANEL OPERATIONS
+	
+	def change_main_stack(self,stack_name):
+		
+		current_stack=self.main_stack.get_visible_child_name()
+		
+		if current_stack !="home":
+			ret=self.check_changes[current_stack]()
+			if ret:
+				ret=self.save_dialog()
+				if ret==Gtk.ResponseType.OK:
+					#dprint("Apply changes and stay in stack")
+					self.apply_clicked(self.apply_button)
+					return
+				if ret==Gtk.ResponseType.CLOSE:
+					#dprint("Discard changes and switch main stack")
+					pass
+				if ret==Gtk.ResponseType.CANCEL:
+					#dprint("Stay in stack")
+					return
+					
+		self.apply_button.set_sensitive(False)
+		
+		if stack_name=="user_management":
+			self.reset_um_widgets()
+			
+		if stack_name=="group_operations":
+			self.reset_go_widgets()
+			
+		if stack_name=="autorefill_options":
+			self.populate_ao_box()
+		
+		if self.main_stack.get_child_by_name(stack_name) != None:
+			self.main_stack.set_visible_child_name(stack_name)	
+		else:
+			self.main_stack.set_visible_child_name("home")
+		
+		self.change_side_stack(stack_name)
+		
+	#def change_main_stack
+	
+	def change_side_stack(self,stack_name):
+		
+		if stack_name=="user_management":
+			self.populate_um_treeview()
+
+		if stack_name=="group_operations":
+			self.populate_go_combo()
+		
+		if self.side_stack.get_child_by_name(stack_name) != None:
+			self.side_stack.set_visible_child_name(stack_name)	
+		else:
+			self.side_stack.set_visible_child_name("home")
+		
+	#def change_side_stack
+	
+	# #########################################
+
+	# CHECK CHANGES FUNCTIONS 
+
+	def check_um_changes(self):
+		
+		if self.current_user!=None :
+			current_qvalue=int(self.um_quota_spinbutton.get_value())			
+			if current_qvalue!=self.current_user["quota"]["default"]:
+				return True
+			
+			if self.current_user["locked"]!=self.um_locked_cb.get_active() or self.current_user["free_pass"]!=self.um_freepass_cb.get_active():
+				return True
+			
+		return False
+				
+	#def check_um_changes
+		
+	def check_go_changes(self):
+		
+		return False
+		
+	#def check_go_changes
+	
+	def check_ao_changes(self):
+		
+		options=self.get_ao_current_values()
+		
+		if options["enabled"] != self.ao_options["enabled"] or options["period"] != self.ao_options["period"] or options["amount"]!=self.ao_options["amount"]:
+			return True
+		
+		return False
+		
+	#def check_ao_chanbges
+	
+	# ##################################
+	
+	# SAVE CHANGES FUNCTIONS
+	
+	def save_um_changes(self):
+		
+		user=self.current_user["user"]
+		quota=int(self.um_quota_spinbutton.get_value())
+		locked=self.um_locked_cb.get_active()
+		freepass=self.um_freepass_cb.get_active()
+
+		ret=self.n4d.set_user_info(user,quota,locked,freepass)
+		
+		if ret:
+			self.current_user["quota"]["default"]=quota
+			self.current_user["locked"]=locked
+			self.current_user["free_pass"]=freepass
+			
+			self.set_mw_success_msg("User updated")
+		else:
+			self.set_mw_error_msg("Failed to update user")
+		
+		return ret
+		
+	#def save_um_changes
+	
+	def save_go_changes(self):
+		return True
+	#def save_go_changes
+	
+	def save_ao_changes(self):
+		
+		options=self.get_ao_current_values()
+		ret1=True
+		ret2=True
+		
+		if options["period"]!=self.ao_options["period"] or options["amount"]!=self.ao_options["amount"]:
+			period_in_seconds=options["period"]
+			ret1=self.n4d.set_autorefill_options(options["amount"],options["period"])
+		if options["enabled"]!=self.ao_options["enabled"]:
+			ret2=self.n4d.set_autorefill_status(options["enabled"])
+		
+		if ret1 and ret2:
+			str_time=self.format_time(time.time())
+			label_str="Last update: %s"%str_time
+			self.ao_last_set_label.set_text(label_str)
+			self.ao_options["period"]=options["period"]
+			self.ao_options["amount"]=options["amount"]
+			self.ao_options["enabled"]=options["enabled"]
+			self.set_mw_success_msg("Auto-refill options saved")
+			return True
+		
+		self.set_mw_error_msg("Failed to save options")
+		return False
+
+	#def save_ao_changes
+	
+	
+	def save_dialog(self):
+		
+		current_stack=self.main_stack.get_visible_child_name()
+		if current_stack=="user_management":
+			msg="User configuration has changed"
+		elif current_stack=="autorefill_options":
+			msg="Auto-refill options have changed"
+		
+		dialog = Gtk.MessageDialog(self.main_window,0, Gtk.MessageType.WARNING,(Gtk.STOCK_APPLY, Gtk.ResponseType.OK,Gtk.STOCK_DISCARD,Gtk.ResponseType.CLOSE,Gtk.STOCK_CANCEL,Gtk.ResponseType.CANCEL),msg)
+		dialog.set_title("Printa Account Manager")
+		dialog.format_secondary_text(_("Do you want to apply changes or discard them?"))
+		
+		# Set breeze icon if possible
+		breeze_icon_path="/usr/share/icons/breeze/status/64/dialog-warning.svg"
+		if os.path.exists(breeze_icon_path):
+			image=Gtk.Image()
+			image.set_from_file(breeze_icon_path)
+			image.show()
+			dialog.set_image(image)
+
+		# Hack to show the correct icon
+		bbox=dialog.get_children()[0].get_children()[1].get_children()[0]
+		discard_button=bbox.get_children()[1]
+		button_image,button_label=discard_button.get_children()[0].get_children()[0].get_children()
+		button_image.set_from_stock(Gtk.STOCK_DELETE,Gtk.IconSize.BUTTON)
+		# ###### #
+		
+		ret=dialog.run()
+		dialog.hide()
+		
+		return ret
+
+	#def save_dialog
+	
+	# ##################################
+	
+	
+	
+#class PrintaManager
+
+
+if __name__=="__main__":
+	
+	server=None
+	
+	if len(sys.argv)>1:
+		server=sys.argv[1]
+		
+	p=PrintaManager(server)
