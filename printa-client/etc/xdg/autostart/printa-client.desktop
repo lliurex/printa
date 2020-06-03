@@ -1,0 +1,7 @@
+[Desktop Entry]
+Encoding=UTF-8
+Name=Printa Client
+Comment=Printa Client GUI
+Exec=/usr/bin/printa-client
+Terminal=false
+Type=Application
