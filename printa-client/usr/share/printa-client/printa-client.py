@@ -18,7 +18,7 @@ import N4dLogin
 
 
 DEBUG=True
-RSRC_PATH="./"
+RSRC_PATH="./rsrc/"
 
 def dprint(data):
 	
