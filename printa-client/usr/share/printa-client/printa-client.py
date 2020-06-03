@@ -18,7 +18,7 @@ import N4dLogin
 
 
 DEBUG=True
-RSRC_PATH="./rsrc/"
+RSRC_PATH="/usr/share/printa-client/rsrc/"
 
 def dprint(data):
 	
