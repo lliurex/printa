@@ -14,7 +14,7 @@ Description: Printa cups backend
 
 Package: n4d-printa-server
 Architecture: all
-Depends: ${misc:Depends}, n4d
+Depends: ${misc:Depends}, n4d, python-cups
 Description: N4d Printa server plugin
  Plugin to manage printa queries
 
