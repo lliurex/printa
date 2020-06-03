@@ -1,0 +1,6 @@
+[SETUP]
+type=python
+path=PrintaClient.py
+class=PrintaClient
+[METHODS]
+request_trigger=adm,admins
