@@ -31,8 +31,8 @@ class N4dLogin:
 		self.use_cache=True
 		self.allow_user_edit=True
 		self.force_get_auth=True
-		self.banner_path='printa.svg'
-		self.icon_path="printa_icon.svg"
+		self.banner_path='rsrc/printa_logo.svg'
+		self.icon_path="rsrc/printa.svg"
 		
 		self.valid_groups=[]
 		

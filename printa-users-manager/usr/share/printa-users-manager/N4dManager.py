@@ -7,7 +7,7 @@ import N4dLogin
 DEBUG=True
 SYSLOG=True
 
-RSRC_PATH="./"
+RSRC_PATH="./rsrc/"
 
 def dprint(data):
 	if DEBUG:
@@ -29,7 +29,7 @@ class N4dManager:
 		self.login.set_force_get_auth(True)
 		self.login.set_use_cache(False)
 		self.login.set_banner_path(RSRC_PATH+"printa-manager-banner.svg")
-		self.login.set_icon_path(RSRC_PATH+"printa_icon.svg")
+		self.login.set_icon_path(RSRC_PATH+"printa.svg")
 		self.login.set_valid_groups(["admins","sudo"])
 	
 	#def init

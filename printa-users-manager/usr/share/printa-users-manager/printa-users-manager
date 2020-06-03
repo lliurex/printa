@@ -18,7 +18,7 @@ import gettext
 _=gettext.gettext
 gettext.textdomain('printa')
 
-RSRC_PATH="./"
+RSRC_PATH="./rsrc/"
 MENU_ICON_SIZE=Gtk.IconSize.LARGE_TOOLBAR
 MENU_TEXT_FONT="Noto Sans 10"
 
