@@ -444,7 +444,7 @@
     <property name="can_focus">False</property>
     <property name="title" translatable="yes">Printa Account Manager</property>
     <property name="window_position">center-always</property>
-    <property name="icon">printa_icon.svg</property>
+    <property name="icon">printa.svg</property>
     <child>
       <placeholder/>
     </child>

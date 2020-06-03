@@ -11,7 +11,7 @@ import gi
 gi.require_version('Gtk', '3.0')
 from gi.repository import Gtk
 
-
+RSRC_PATH="/usr/share/printa-users-manager/rsrc/"
 
 DEBUG=False
 
@@ -31,8 +31,8 @@ class N4dLogin:
 		self.use_cache=True
 		self.allow_user_edit=True
 		self.force_get_auth=True
-		self.banner_path='rsrc/printa_logo.svg'
-		self.icon_path="rsrc/printa.svg"
+		self.banner_path=RSRC_PATH+'/printa_logo.svg'
+		self.icon_path=RSRC_PATH+"/printa.svg"
 		
 		self.valid_groups=[]
 		

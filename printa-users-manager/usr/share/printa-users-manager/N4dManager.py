@@ -7,7 +7,7 @@ import N4dLogin
 DEBUG=True
 SYSLOG=True
 
-RSRC_PATH="./rsrc/"
+RSRC_PATH="/usr/share/printa-users-manager/rsrc/"
 
 def dprint(data):
 	if DEBUG:
