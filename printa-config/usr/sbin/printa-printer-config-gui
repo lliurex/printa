@@ -154,7 +154,7 @@ class PrintaPrinterConfig:
 	def execute(self,cmd):
 		
 		os.system(cmd)
-		self.populate_treeview(False)
+		self.populate_treeview(True)
 		self.window.set_sensitive(True)
 		return False
 	
