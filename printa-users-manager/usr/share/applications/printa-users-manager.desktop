@@ -1,0 +1,17 @@
+[Desktop Entry]
+Version=1.0
+Encoding=UTF-8
+Name=Printa Users Manager
+Name[en]=Printa users manager
+Name[ca_ES@valencia]=Printa users manager
+Name[es]=Gestor de usuarios de Printa
+Comment=Application to manage Printa user accounts
+Comment[en]=Application to manage Printa user accounts
+Comment[es]=Aplicación para gestionar cuentas de usuario de Printa
+Comment[ca_ES@valencia]=Application to manage Printa user accounts
+Exec=printa-users-manager
+Terminal=false
+Icon=printa
+Type=Application
+GenericName=printa-users-manager
+Categories=LliureX-Administration

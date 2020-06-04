@@ -1,0 +1,17 @@
+[Desktop Entry]
+Version=1.0
+Encoding=UTF-8
+Name=Printa Printer configuration
+Name[en]=Printa printers configuration
+Name[ca_ES@valencia]=Printa printers configuration
+Name[es]=Confoguración de impresoras Printa
+Comment=Application to control printers with Printa
+Comment[en]=Application to control printers with Printa
+Comment[es]=Aplicación para controlar impresoras con Printa
+Comment[ca_ES@valencia]=Application to control printers with Printa
+Exec=printa-printer-config
+Terminal=false
+Icon=printa
+Type=Application
+GenericName=printa-printer-config
+Categories=LliureX-Administration
