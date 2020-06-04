@@ -15,7 +15,8 @@ import ssl
 import signal
 signal.signal(signal.SIGINT, signal.SIG_DFL)
 import N4dLogin
-
+import sys
+import psutil
 
 DEBUG=True
 RSRC_PATH="/usr/share/printa-client/rsrc/"
@@ -30,26 +31,27 @@ class PrintaClient:
 	
 	def __init__(self):
 		
-		self.remote_server=self.get_printa_config_variable()
-		self.n4d_login=N4dLogin.N4dLogin(self.remote_server)
-		
 		self.window_ref=None
 		self.processed_ids=[]
 		self.uid=os.geteuid()
 		self.user=pwd.getpwuid(self.uid).pw_name
 		self.dpath="/run/user/%s/printa"%os.getuid()
+		self.token_path=self.dpath+"/printa_client"
+		self.gui_token=self.dpath+"/printa_client_gui_token"
+		
 		if not os.path.exists(self.dpath):
 			os.makedirs(self.dpath)
-		self.token_path=self.dpath+"/printa_client"
+			
+		self.create_gui_token()
+		self.create_path_file()
 		dprint(self.token_path)
 		
-		if self.remote_server==None:
-			self.remote_server="127.0.0.1"
-		self.ip=self.get_own_ip()
-		
-		self.create_path_file()
-		self.init_gio_watcher()
+		self.remote_server=self.get_printa_config_variable()
+		self.ip=self.get_own_ip(self.remote_server)
+		self.n4d_login=N4dLogin.N4dLogin(self.remote_server)
 
+		self.init_gio_watcher()
+		
 		GObject.threads_init()
 		self.start_gui()
 		
@@ -129,7 +131,10 @@ class PrintaClient:
 	
 		context=ssl._create_unverified_context()
 		c=xmlrpc.client.ServerProxy("https://localhost:9779",allow_none=True,context=context)
-		return c.get_variable("","VariablesManager","PRINTASERVER")
+		v=c.get_variable("","VariablesManager","PRINTASERVER")
+		if v!=None:
+			return v
+		return "127.0.0.1"
 		
 	#def get_printa_config_variable
 	
@@ -238,13 +243,39 @@ class PrintaClient:
 	# BASIC FUNCTIONS
 	# ###################
 	
-	def get_own_ip(self):
+	def create_gui_token(self):
+		#self.gui_token
+		
+		try:
+			if os.path.exists(self.gui_token):
+				f=open(self.gui_token)
+				pid=int(f.readline())
+				f.close()
+				
+				if psutil.pid_exists(pid):
+					p=psutil.Process(pid)
+					cmdline=p.cmdline()
+					if len(cmdline)==2 and cmdline[1]=="/usr/bin/printa-client":
+						print("[!] Another instance of printa-client is already running.")
+						sys.exit(1)
+		except Exception as e:
+			raise e
+			sys.exit(1)
+				
+		f=open(self.gui_token,"w")
+		f.write(str(os.getpid()))
+		f.close()
+					
+					
+	
+	
+	def get_own_ip(self,remote_server):
 
 		ip = None
 		
 		try:
 			s=socket.socket(socket.AF_INET,socket.SOCK_DGRAM)
-			s.connect((self.remote_server,9779))
+			s.connect((remote_server,9779))
 			ip,port=s.getsockname()
 		except Exception as e:
 			print(e)
