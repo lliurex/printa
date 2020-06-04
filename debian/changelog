@@ -2,6 +2,8 @@ printa (1:0.3) bionic; urgency=medium
 
   * Added token logic to printa-client
   * Fixed printa-users-manager link
+  * Added desktop files
+  * Added printa-common-data package
 
  -- Hector Garcia Huerta <hectorgh@gmail.com>  Thu, 04 Jun 2020 12:34:41 +0200
 
