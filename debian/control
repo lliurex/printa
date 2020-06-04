@@ -32,13 +32,18 @@ Description: Printa client GUI
 
 Package: printa-printer-config
 Architecture: all
-Depends: ${misc:Depends}, python3
+Depends: ${misc:Depends}, python3, printa-common-data
 Description: Printa printer configuration GUI
  Printa GUI to control printers in the system
 
 Package: printa-users-manager
 Architecture: all
-Depends: ${misc:Depends}, python3
+Depends: ${misc:Depends}, python3, printa-common-data
 Description: Printa users manager GUI
  Printa gui to manage Printa user accounts
+
+Package: printa-common-data
+Architecture: all
+Description: Printa common files
+ Package containing Printa common files
 
