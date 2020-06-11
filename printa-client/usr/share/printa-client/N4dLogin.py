@@ -10,6 +10,7 @@ gi.require_version('Gtk', '3.0')
 from gi.repository import Gtk
 
 DEBUG=True
+ICON_PATH="/usr/share/printa-client/rsrc/printa.svg"
 
 def dprint(data):
 	
@@ -165,7 +166,7 @@ class N4dLogin:
 		(Gtk.STOCK_CANCEL, Gtk.ResponseType.REJECT,Gtk.STOCK_OK, Gtk.ResponseType.ACCEPT))
 		
 		img=Gtk.Image()
-		img.set_from_file('printa.svg')
+		img.set_from_file(ICON_PATH)
 		img.show()
 		dialog.vbox.pack_start(img,False,True,5)
 
