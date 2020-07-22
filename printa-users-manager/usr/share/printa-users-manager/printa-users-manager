@@ -16,7 +16,7 @@ signal.signal(signal.SIGINT, signal.SIG_DFL)
 
 import gettext
 _=gettext.gettext
-gettext.textdomain('printa')
+gettext.textdomain('printa-users-manager')
 
 RSRC_PATH="/usr/share/printa-users-manager/rsrc/"
 MENU_ICON_SIZE=Gtk.IconSize.LARGE_TOOLBAR
