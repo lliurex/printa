@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-07-22 01:46+0200\n"
+"POT-Creation-Date: 2020-07-22 03:27+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -82,6 +82,8 @@ msgid "UID"
 msgstr ""
 
 #: ../printa-users-manager/usr/share/printa-users-manager/rsrc/printa-manager.ui:681
+#: ../printa-users-manager/usr/share/printa-users-manager/printa-users-manager:307
+#: ../printa-users-manager/usr/share/printa-users-manager/printa-users-manager:321
 msgid "Name"
 msgstr ""
 
@@ -107,4 +109,36 @@ msgstr ""
 
 #: ../printa-users-manager/usr/share/printa-users-manager/rsrc/printa-manager.ui:872
 msgid "Account Manager"
+msgstr ""
+
+#: ../printa-users-manager/usr/share/printa-users-manager/printa-users-manager:319
+msgid "Date"
+msgstr ""
+
+#: ../printa-users-manager/usr/share/printa-users-manager/printa-users-manager:323
+msgid "Printer"
+msgstr ""
+
+#: ../printa-users-manager/usr/share/printa-users-manager/printa-users-manager:325
+msgid "Copies"
+msgstr ""
+
+#: ../printa-users-manager/usr/share/printa-users-manager/printa-users-manager:327
+msgid "Pages"
+msgstr ""
+
+#: ../printa-users-manager/usr/share/printa-users-manager/printa-users-manager:336
+msgid "User list"
+msgstr ""
+
+#: ../printa-users-manager/usr/share/printa-users-manager/printa-users-manager:911
+msgid "Do you want to apply changes or discard them?"
+msgstr ""
+
+#: ../printa-users-manager/usr/share/printa-users-manager/N4dLogin.py:248
+msgid "User"
+msgstr ""
+
+#: ../printa-users-manager/usr/share/printa-users-manager/N4dLogin.py:253
+msgid "Password"
 msgstr ""
