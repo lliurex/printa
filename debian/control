@@ -26,7 +26,7 @@ Description: N4d Printa client plugin
 
 Package: printa-client
 Architecture: all
-Depends: ${misc:Depends}, python3
+Depends: ${misc:Depends}, python3,printa-common-data
 Description: Printa client GUI
  Printa gui managing user printing
 
