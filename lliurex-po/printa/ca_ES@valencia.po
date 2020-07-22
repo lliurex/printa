@@ -162,7 +162,7 @@ msgstr "Afegir nova impressora"
 
 #: ../printa-printer-config/usr/share/printa-printer-config/rsrc/printa-printer-config-gui.ui:159
 msgid "PRINTA Printer Configuration"
-msgstr "PRINTA Printer Configuration"
+msgstr "PRINTA  Configurador d'impressores"
 
 #: ../printa-printer-config/usr/sbin/printa-printer-config-gui:101
 msgid "Controlled"
