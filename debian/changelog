@@ -1,3 +1,9 @@
+printa (1:0.3.6) bionic; urgency=medium
+
+  * Pofiles to common data
+
+ -- Hector Garcia Huerta <hectorgh@gmail.com>  Wed, 22 Jul 2020 11:28:47 +0200
+
 printa (1:0.3.5) bionic; urgency=medium
 
   * Adding translations 
