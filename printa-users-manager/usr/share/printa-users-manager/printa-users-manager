@@ -316,15 +316,15 @@ class PrintaManager:
 		
 		self.um_history_liststore=Gtk.ListStore(str,str,str,str,str)
 		self.um_history_treeview.set_model(self.um_history_liststore)
-		column=self.create_column("Date",0)
+		column=self.create_column(_("Date"),0)
 		self.um_history_treeview.append_column(column)
-		column=self.create_column("Name",1)
+		column=self.create_column(_("Name"),1)
 		self.um_history_treeview.append_column(column)
-		column=self.create_column("Printer",2)
+		column=self.create_column(_("Printer"),2)
 		self.um_history_treeview.append_column(column)
-		column=self.create_column("Copies",3)
+		column=self.create_column(_("Copies"),3)
 		self.um_history_treeview.append_column(column)
-		column=self.create_column("Pages",4)
+		column=self.create_column(_("Pages"),4)
 		self.um_history_treeview.append_column(column)
 		
 	#def  build_um_history_treeview

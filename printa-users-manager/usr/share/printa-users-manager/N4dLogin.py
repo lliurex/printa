@@ -6,6 +6,9 @@ import ssl
 import sys
 import socket
 
+import gettext
+_=gettext.gettext
+gettext.textdomain('printa')
 
 import gi
 gi.require_version('Gtk', '3.0')
@@ -242,12 +245,12 @@ class N4dLogin:
 		user_entry=Gtk.Entry()
 		user_entry.set_text(self.user)
 		user_entry.set_sensitive(self.allow_user_edit)
-		user_label=Gtk.Label("User")
+		user_label=Gtk.Label(_("User"))
 		user_label.set_alignment(1,0.5)
 		password_entry=Gtk.Entry()
 		password_entry.set_visibility(False)
 		password_entry.connect("activate",manual_validate,dialog)
-		password_label=Gtk.Label("Password")
+		password_label=Gtk.Label(_("Password"))
 		password_label.set_alignment(1,0.5)
 		hbox1.attach(user_label,0,0,1,1)
 		hbox1.attach(user_entry,1,0,1,1)
