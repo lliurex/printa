@@ -1,3 +1,9 @@
+printa (1:0.3.4) bionic; urgency=medium
+
+  * Adding GUI translations 
+
+ -- Daniel Duran <daduve@gmail.com>  Wed, 22 Jul 2020 02:21:20 +0200
+
 printa (1:0.3.3) bionic; urgency=high
 
   * Adding translations to desktops"
