@@ -1,0 +1,104 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: \n"
+"POT-Creation-Date: \n"
+"PO-Revision-Date: \n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=ISO-8859-1\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Language: es_ES\n"
+"X-Generator: Poedit 2.0.6\n"
+
+#: ../printa-users-manager/usr/share/printa-users-manager/rsrc/printa-manager.ui:11
+msgid "<   Auto-refill Options"
+msgstr "<   Opciones de Auto-Recarga"
+
+#: ../printa-users-manager/usr/share/printa-users-manager/rsrc/printa-manager.ui:33
+msgid "Auto-refill quota options"
+msgstr "Opciones de cuota de recarga automática"
+
+#: ../printa-users-manager/usr/share/printa-users-manager/rsrc/printa-manager.ui:51
+msgid "Enabled"
+msgstr "Habilitado"
+
+#: ../printa-users-manager/usr/share/printa-users-manager/rsrc/printa-manager.ui:107
+msgid "Auto-refill amount:"
+msgstr "Cantidad de recarga automática:"
+
+#: ../printa-users-manager/usr/share/printa-users-manager/rsrc/printa-manager.ui:119
+msgid "Auto-refill every:"
+msgstr "Auto-recargar cada:"
+
+#: ../printa-users-manager/usr/share/printa-users-manager/rsrc/printa-manager.ui:154
+msgid "Months"
+msgstr "Meses"
+
+#: ../printa-users-manager/usr/share/printa-users-manager/rsrc/printa-manager.ui:180
+msgid "Days"
+msgstr "Dias"
+
+#: ../printa-users-manager/usr/share/printa-users-manager/rsrc/printa-manager.ui:216
+msgid "Group operations"
+msgstr "Operaciones con grupos"
+
+#: ../printa-users-manager/usr/share/printa-users-manager/rsrc/printa-manager.ui:238
+msgid "Set new quota for every user in the group:"
+msgstr "Establecer una nueva cuota para cada usuario del grupo:"
+
+#: ../printa-users-manager/usr/share/printa-users-manager/rsrc/printa-manager.ui:276
+msgid "Add/Substract a value to the quota of every user in the group:"
+msgstr "Agregar/quitar un valor a la cuota de cada usuario del grupo:"
+
+#: ../printa-users-manager/usr/share/printa-users-manager/rsrc/printa-manager.ui:314
+msgid "Set special flag to every user in the group:"
+msgstr "Establecer una marca especial para cada usuario del grupo:"
+
+#: ../printa-users-manager/usr/share/printa-users-manager/rsrc/printa-manager.ui:362
+msgid "<  Group Operations"
+msgstr "<  Operaciones con Grupos"
+
+#: ../printa-users-manager/usr/share/printa-users-manager/rsrc/printa-manager.ui:445
+msgid "Printa Account Manager"
+msgstr "Printa Account Manager"
+
+#: ../printa-users-manager/usr/share/printa-users-manager/rsrc/printa-manager.ui:566
+msgid "<   User Manager"
+msgstr "<   Gestor de usuarios"
+
+#: ../printa-users-manager/usr/share/printa-users-manager/rsrc/printa-manager.ui:645
+msgid "User Details"
+msgstr "Detalles de usuario"
+
+#: ../printa-users-manager/usr/share/printa-users-manager/rsrc/printa-manager.ui:669
+msgid "UID"
+msgstr "UID"
+
+#: ../printa-users-manager/usr/share/printa-users-manager/rsrc/printa-manager.ui:681
+msgid "Name"
+msgstr "Nombre"
+
+#: ../printa-users-manager/usr/share/printa-users-manager/rsrc/printa-manager.ui:693
+msgid "Quota"
+msgstr "Cuota"
+
+#: ../printa-users-manager/usr/share/printa-users-manager/rsrc/printa-manager.ui:705
+msgid "Special Flags:"
+msgstr "Marca Especial:"
+
+#: ../printa-users-manager/usr/share/printa-users-manager/rsrc/printa-manager.ui:715
+msgid "Locked"
+msgstr "Bloqueado"
+
+#: ../printa-users-manager/usr/share/printa-users-manager/rsrc/printa-manager.ui:728
+msgid "Free pass"
+msgstr "Impresion sin clave"
+
+#: ../printa-users-manager/usr/share/printa-users-manager/rsrc/printa-manager.ui:808
+msgid "User History"
+msgstr "Historial de usuario"
+
+#: ../printa-users-manager/usr/share/printa-users-manager/rsrc/printa-manager.ui:872
+msgid "Account Manager"
+msgstr "Account Manager"
