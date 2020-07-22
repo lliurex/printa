@@ -42,7 +42,7 @@ class PrintaManager:
 			sys.exit(0)
 			
 		self.n4d.set_auth(self.n4d.login.user,self.n4d.login.ticket)
-		self.sm_sections=[["actor","User Management\t","user_management",MENU_ICON_SIZE,MENU_TEXT_FONT],["user-group-new","Group operations\t","group_operations",MENU_ICON_SIZE,MENU_TEXT_FONT],["appointment-new","Auto-refill options\t","autorefill_options",MENU_ICON_SIZE,MENU_TEXT_FONT]]
+		self.sm_sections=[["actor",_("User Management\t"),"user_management",MENU_ICON_SIZE,MENU_TEXT_FONT],["user-group-new",_("Group operations\t"),"group_operations",MENU_ICON_SIZE,MENU_TEXT_FONT],["appointment-new",_("Auto-refill options\t"),"autorefill_options",MENU_ICON_SIZE,MENU_TEXT_FONT]]
 		
 		self.current_user=None
 		self.check_changes={}

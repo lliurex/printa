@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-07-22 03:21+0200\n"
+"POT-Creation-Date: 2020-07-22 03:47+0200\n"
 "PO-Revision-Date: \n"
 "Last-Translator: \n"
 "Language-Team: \n"
@@ -105,6 +105,18 @@ msgstr "Historial de usuario"
 #: ../printa-users-manager/usr/share/printa-users-manager/rsrc/printa-manager.ui:872
 msgid "Account Manager"
 msgstr "Account Manager"
+
+#: ../printa-users-manager/usr/share/printa-users-manager/printa-users-manager:45
+msgid "User Management\t"
+msgstr "Gestor de usuarios\t"
+
+#: ../printa-users-manager/usr/share/printa-users-manager/printa-users-manager:45
+msgid "Group operations\t"
+msgstr "Operaciones con grupos\t"
+
+#: ../printa-users-manager/usr/share/printa-users-manager/printa-users-manager:45
+msgid "Auto-refill options\t"
+msgstr "Opciones de cuota de recarga automática\t"
 
 #: ../printa-users-manager/usr/share/printa-users-manager/printa-users-manager:319
 msgid "Date"
