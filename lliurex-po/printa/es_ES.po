@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-07-22 03:47+0200\n"
+"POT-Creation-Date: 2020-07-22 04:05+0200\n"
 "PO-Revision-Date: \n"
 "Last-Translator: \n"
 "Language-Team: \n"
@@ -123,6 +123,7 @@ msgid "Date"
 msgstr "Fecha"
 
 #: ../printa-users-manager/usr/share/printa-users-manager/printa-users-manager:323
+#: ../printa-printer-config/usr/sbin/printa-printer-config-gui:94
 msgid "Printer"
 msgstr "Impresora"
 
@@ -139,6 +140,7 @@ msgid "User list"
 msgstr "Historial de usuario"
 
 #: ../printa-users-manager/usr/share/printa-users-manager/printa-users-manager:911
+#: ../printa-printer-config/usr/sbin/printa-printer-config-gui:206
 msgid "Do you want to apply changes or discard them?"
 msgstr "¿Quieres aplicar los cambios o descartarlos?"
 
@@ -149,3 +151,27 @@ msgstr "Usuario"
 #: ../printa-users-manager/usr/share/printa-users-manager/N4dLogin.py:253
 msgid "Password"
 msgstr "Contraseña"
+
+#: ../printa-printer-config/usr/share/printa-printer-config/rsrc/printa-printer-config-gui.ui:9
+msgid "Printa - Printing quota"
+msgstr "Printa - Printing quota"
+
+#: ../printa-printer-config/usr/share/printa-printer-config/rsrc/printa-printer-config-gui.ui:114
+msgid "Add new printer"
+msgstr "Añadir nueva impresora"
+
+#: ../printa-printer-config/usr/share/printa-printer-config/rsrc/printa-printer-config-gui.ui:159
+msgid "PRINTA Printer Configuration"
+msgstr "PRINTA Printer Configuration"
+
+#: ../printa-printer-config/usr/sbin/printa-printer-config-gui:101
+msgid "Controlled"
+msgstr "Controlada"
+
+#: ../printa-printer-config/usr/sbin/printa-printer-config-gui:185
+msgid "Error executing command:"
+msgstr "Error ejecutando el comando:"
+
+#: ../printa-printer-config/usr/sbin/printa-printer-config-gui:205
+msgid "Configuration has changed"
+msgstr "Configuración modificada."
