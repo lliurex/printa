@@ -1,0 +1,24 @@
+#!/bin/sh
+
+set -e
+
+BACKEND="/usr/lib/cups/backend/printa"
+
+case $1 in 
+
+        configure)
+		chmod 700 $BACKEND || true
+		systemctl restart cups || true
+
+                ;;
+	   abort-upgrade|abort-remove|abort-deconfigure)
+			   ;;
+        *)
+                echo "Nothing to do"
+                ;; 
+esac
+
+#DEBHELPER#
+
+exit 0
+
