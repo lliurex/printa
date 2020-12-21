@@ -1,3 +1,10 @@
+printa (1:0.4.1) bionic; urgency=medium
+
+  * Trying to fix utf-8 job name saving in history file
+  * printa-client: if ticket is invalid, it gets deleted 
+
+ -- Hector Garcia Huerta <hectorgh@gmail.com>  Mon, 21 Dec 2020 20:29:07 +0100
+
 printa (1:0.4) bionic; urgency=medium
 
   * Fixed commit_request for every user
