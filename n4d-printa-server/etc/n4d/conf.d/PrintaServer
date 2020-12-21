@@ -5,7 +5,7 @@ class=PrintaServer
 [METHODS]
 (ip)add_request=anonymous
 get_request_var=anonymous
-commit_request=sudo,admins
+commit_request=*
 get_request_status=anonymous
 validate_request=anonymous
 save_variable=sudo,admins
