@@ -220,8 +220,15 @@ class PrintaServer:
 	def _add_job_to_history(self,job):
 		
 		history=self._get_history()
-		user=job["user"]
 		
+		try:
+			job["printer_name"]=job["printer_name"].encode("utf8")
+			job["job_name"]=job["job_name"].encode("utf8")
+			job["args"][3]=job["args"][3].encode("utf-8")
+		except:
+			pass
+		
+		user=job["user"]
 		if user not in history:
 			history[user]=[]
 		

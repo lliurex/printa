@@ -146,6 +146,8 @@ class N4dLogin:
 				dprint("Ticket found in %s"%ticket)
 				if self.validate_ticket(self.user,t):
 					return t
+				else:
+					os.remove(t)
 					
 		return None
 		
