@@ -1,6 +1,7 @@
 printa (1:0.3.4) bionic; urgency=medium
 
   * Fixed commit_request for every user
+  * Added system-config-printer dependency
 
  -- Hector Garcia Huerta <hectorgh@gmail.com>  Mon, 21 Dec 2020 19:37:23 +0100
 
