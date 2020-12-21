@@ -1,4 +1,4 @@
-printa (1:0.3.4) bionic; urgency=medium
+printa (1:0.4) bionic; urgency=medium
 
   * Fixed commit_request for every user
   * Added system-config-printer dependency
