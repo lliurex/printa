@@ -10,6 +10,7 @@ import tempfile
 import os
 import shutil
 import threading
+import codecs
 
 class PrintaServer:
 	
@@ -203,7 +204,7 @@ class PrintaServer:
 			
 			self.saving_history=True
 			tmp,filename=tempfile.mkstemp()
-			f = open(filename,'w')
+			f = codecs.open(filename,'w',"utf-8")
 			json.dump(data,f,indent=4,encoding="utf-8", ensure_ascii=False)			
 			f.close()
 			shutil.copy(filename,self.history_file)
@@ -220,13 +221,6 @@ class PrintaServer:
 	def _add_job_to_history(self,job):
 		
 		history=self._get_history()
-		
-		try:
-			job["printer_name"]=job["printer_name"].encode("utf8")
-			job["job_name"]=job["job_name"].encode("utf8")
-			job["args"][3]=job["args"][3].encode("utf-8")
-		except:
-			pass
 		
 		user=job["user"]
 		if user not in history:
