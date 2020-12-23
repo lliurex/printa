@@ -1,3 +1,9 @@
+printa (1:0.4.2) bionic; urgency=medium
+
+  * Using codecs library to open files in utf-8 mode
+
+ -- Hector Garcia Huerta <hectorgh@gmail.com>  Wed, 23 Dec 2020 08:39:32 +0100
+
 printa (1:0.4.1) bionic; urgency=medium
 
   * Trying to fix utf-8 job name saving in history file
