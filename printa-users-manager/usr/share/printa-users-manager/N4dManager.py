@@ -224,10 +224,10 @@ class N4dManager:
 		
 	#def get_autorefill_options
 	
-	def set_autorefill_options(self,amount,period):
+	def set_autorefill_options(self,amount,period,quota_limit):
 		
 		try:
-			ret=self.client.set_autorefill_options(self.auth,"PrintaServer",amount,period)
+			ret=self.client.set_autorefill_options(self.auth,"PrintaServer",amount,period,quota_limit)
 			
 			if ret["status"]:
 				#dprint("set_autorefill_options success")

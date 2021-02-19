@@ -46,6 +46,7 @@ class PrintaServer:
 			self.db["autorefill"]={}
 			self.db["autorefill"]["enabled"]=False
 			self.db["autorefill"]["period"]=0
+			self.db["autorefill"]["quota_limit"]=500
 			self.db["autorefill"]["last_set"]=None
 			self.db["autorefill"]["should_set"]=None
 			self.db["autorefill"]["amount"]=0
@@ -293,7 +294,12 @@ class PrintaServer:
 				
 				if len(self.db["autorefill"]["group_filter"])==0:
 					for user in self.db["users"]:
-						self.db["users"][user]["quota"]["default"]+=self.db["autorefill"]["amount"]
+						new_valor=self.db["users"][user]["quota"]["default"]+self.db["autorefill"]["amount"]
+						if new_valor >= self.db["autorefill"]["quota_limit"]:
+							self.db["users"][user]["quota"]["default"]=self.db["autorefill"]["quota_limit"]
+						else:
+							self.db["users"][user]["quota"]["default"]=new_valor
+
 				
 				self.save_db_variable()
 				self.autorefill_thread_working=False
@@ -360,10 +366,11 @@ class PrintaServer:
 		
 	#def set_autorefill_status
 	
-	def set_autorefill_options(self,amount,period_in_days,group_filter=[],restart=True):
+	def set_autorefill_options(self,amount,period_in_days,quota_limit,group_filter=[],restart=True):
 		
 		try:
 			self.db["autorefill"]["amount"]=int(amount)
+			self.db["autorefill"]["quota_limit"]=int(quota_limit)
 			#Easier to work with seconds internally
 			self.db["autorefill"]["period"]=int(period_in_days)*24*60*60
 			self.db["autorefill"]["last_set"]=time.time()
