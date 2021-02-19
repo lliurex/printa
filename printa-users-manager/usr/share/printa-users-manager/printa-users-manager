@@ -123,6 +123,7 @@ class PrintaManager:
 		self.ao_back_button=builder.get_object("ao_back_button")
 		self.ao_amount_sb=builder.get_object("ao_amount_sb")
 		self.ao_last_set_label=builder.get_object("ao_last_set_label")
+		self.go_quota_limit=builder.get_object("go_quota_limit")
 		
 		self.um_uid_entry=builder.get_object("um_uid_entry")
 		self.um_name_entry=builder.get_object("um_name_entry")
@@ -140,6 +141,8 @@ class PrintaManager:
 		self.ao_days_sb.set_adjustment(adjustment)
 		adjustment=Gtk.Adjustment(0,-1000,1000,1,10,0)
 		self.ao_amount_sb.set_adjustment(adjustment)
+		adjustment=Gtk.Adjustment(0,0,100000,1,10,0)
+		self.go_quota_limit.set_adjustment(adjustment)
 		
 		self.main_stack=Gtk.Stack()
 		self.main_stack.add_titled(self.welcome_box,"home","Home")
@@ -428,6 +431,8 @@ class PrintaManager:
 	def populate_ao_box(self):
 		
 		self.ao_options=self.n4d.get_autorefill_options()
+		print(1111111111)
+		print('self.ao_options: %s'%self.ao_options)
 		if self.ao_options==None:
 			return
 
@@ -436,6 +441,12 @@ class PrintaManager:
 		period=self.ao_options["period"]
 		amount=self.ao_options["amount"]
 		last_set=self.ao_options["last_set"]
+		try:
+			quota_limit=self.ao_options["quota_limit"]
+		except Exception as e:
+			quota_limit=500
+			self.ao_options["quota_limit"]=500
+			
 		
 		if period!=0:
 			months=int(period/31)
@@ -447,6 +458,7 @@ class PrintaManager:
 		self.ao_days_sb.set_value(days)
 		
 		self.ao_amount_sb.set_value(amount)
+		self.go_quota_limit.set_value(quota_limit)
 		
 		label_str=""
 		if last_set!=None:
@@ -467,11 +479,14 @@ class PrintaManager:
 		# Period in days
 		current_period=current_day + current_month*31
 		current_status=self.ao_enabled_cb.get_active()
+		#limit quota
+		quota_limit=int(self.go_quota_limit.get_value())
 		
 		ret={}
 		ret["amount"]=current_amount
 		ret["period"]=current_period
 		ret["enabled"]=current_status
+		ret["quota_limit"]=quota_limit
 
 		return ret
 		
@@ -502,6 +517,7 @@ class PrintaManager:
 		self.ao_amount_sb.connect("changed",self.ao_spinbuttons_changed)
 		self.ao_months_sb.connect("changed",self.ao_spinbuttons_changed)
 		self.ao_days_sb.connect("changed",self.ao_spinbuttons_changed)
+		self.go_quota_limit.connect("changed",self.ao_spinbuttons_changed)
 		
 	#def connect_signals
 	
@@ -833,7 +849,7 @@ class PrintaManager:
 		
 		options=self.get_ao_current_values()
 		
-		if options["enabled"] != self.ao_options["enabled"] or options["period"] != self.ao_options["period"] or options["amount"]!=self.ao_options["amount"]:
+		if options["enabled"] != self.ao_options["enabled"] or options["period"] != self.ao_options["period"] or options["amount"]!=self.ao_options["amount"]  or options["quota_limit"]!=self.ao_options["quota_limit"]:
 			return True
 		
 		return False
@@ -875,10 +891,13 @@ class PrintaManager:
 		options=self.get_ao_current_values()
 		ret1=True
 		ret2=True
+
+		if options["quota_limit"]!=self.ao_options["quota_limit"]:
+			self.ao_options["quota_limit"]=options["quota_limit"]
 		
 		if options["period"]!=self.ao_options["period"] or options["amount"]!=self.ao_options["amount"]:
 			period_in_seconds=options["period"]
-			ret1=self.n4d.set_autorefill_options(options["amount"],options["period"])
+			ret1=self.n4d.set_autorefill_options(options["amount"],options["period"],options["quota_limit"])
 		if options["enabled"]!=self.ao_options["enabled"]:
 			ret2=self.n4d.set_autorefill_status(options["enabled"])
 		
