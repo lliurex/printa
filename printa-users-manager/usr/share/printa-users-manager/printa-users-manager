@@ -431,8 +431,7 @@ class PrintaManager:
 	def populate_ao_box(self):
 		
 		self.ao_options=self.n4d.get_autorefill_options()
-		print(1111111111)
-		print('self.ao_options: %s'%self.ao_options)
+		
 		if self.ao_options==None:
 			return
 
