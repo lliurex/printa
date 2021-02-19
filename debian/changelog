@@ -1,3 +1,9 @@
+printa (1:0.4.3) bionic-updates; urgency=medium
+
+  * Adding Quota limit
+
+ -- Daniel Duran <daduve@gmail.com>  Fri, 19 Feb 2021 20:50:12 +0100
+
 printa (1:0.4.2) bionic; urgency=medium
 
   * Using codecs library to open files in utf-8 mode
