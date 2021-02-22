@@ -294,11 +294,12 @@ class PrintaServer:
 				
 				if len(self.db["autorefill"]["group_filter"])==0:
 					for user in self.db["users"]:
-						new_valor=self.db["users"][user]["quota"]["default"]+self.db["autorefill"]["amount"]
-						if new_valor >= self.db["autorefill"]["quota_limit"]:
+						
+						new_amount=self.db["users"][user]["quota"]["default"]+self.db["autorefill"]["amount"]
+						if new_amount >= self.db["autorefill"]["quota_limit"]:
 							self.db["users"][user]["quota"]["default"]=self.db["autorefill"]["quota_limit"]
 						else:
-							self.db["users"][user]["quota"]["default"]=new_valor
+							self.db["users"][user]["quota"]["default"]=new_amount
 
 				
 				self.save_db_variable()
