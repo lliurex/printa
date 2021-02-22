@@ -235,7 +235,7 @@
           </packing>
         </child>
         <child>
-          <object class="GtkSpinButton" id="go_quota_limit">
+          <object class="GtkSpinButton" id="ao_quota_limit">
             <property name="visible">True</property>
             <property name="can_focus">True</property>
             <property name="width_chars">6</property>
