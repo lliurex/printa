@@ -22,6 +22,8 @@ RSRC_PATH="/usr/share/printa-users-manager/rsrc/"
 MENU_ICON_SIZE=Gtk.IconSize.LARGE_TOOLBAR
 MENU_TEXT_FONT="Noto Sans 10"
 
+AUTOREFILL_QUOTA_LIMIT=500
+
 DEBUG=True
 SYSLOG=False
 
@@ -123,7 +125,7 @@ class PrintaManager:
 		self.ao_back_button=builder.get_object("ao_back_button")
 		self.ao_amount_sb=builder.get_object("ao_amount_sb")
 		self.ao_last_set_label=builder.get_object("ao_last_set_label")
-		self.go_quota_limit=builder.get_object("go_quota_limit")
+		self.go_quota_limit=builder.get_object("ao_quota_limit")
 		
 		self.um_uid_entry=builder.get_object("um_uid_entry")
 		self.um_name_entry=builder.get_object("um_name_entry")
@@ -142,7 +144,7 @@ class PrintaManager:
 		adjustment=Gtk.Adjustment(0,-1000,1000,1,10,0)
 		self.ao_amount_sb.set_adjustment(adjustment)
 		adjustment=Gtk.Adjustment(0,0,100000,1,10,0)
-		self.go_quota_limit.set_adjustment(adjustment)
+		self.ao_quota_limit.set_adjustment(adjustment)
 		
 		self.main_stack=Gtk.Stack()
 		self.main_stack.add_titled(self.welcome_box,"home","Home")
@@ -440,12 +442,10 @@ class PrintaManager:
 		period=self.ao_options["period"]
 		amount=self.ao_options["amount"]
 		last_set=self.ao_options["last_set"]
-		try:
+		if "quota_limit" in self.ao_options:
 			quota_limit=self.ao_options["quota_limit"]
-		except Exception as e:
-			quota_limit=500
-			self.ao_options["quota_limit"]=500
-			
+		else:
+			self.ao_options["quota_limit"]=AUTOREFILL_QUOTA_LIMIT
 		
 		if period!=0:
 			months=int(period/31)
