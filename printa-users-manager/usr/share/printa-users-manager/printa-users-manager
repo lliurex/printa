@@ -125,7 +125,7 @@ class PrintaManager:
 		self.ao_back_button=builder.get_object("ao_back_button")
 		self.ao_amount_sb=builder.get_object("ao_amount_sb")
 		self.ao_last_set_label=builder.get_object("ao_last_set_label")
-		self.go_quota_limit=builder.get_object("ao_quota_limit")
+		self.ao_quota_limit=builder.get_object("ao_quota_limit")
 		
 		self.um_uid_entry=builder.get_object("um_uid_entry")
 		self.um_name_entry=builder.get_object("um_name_entry")
@@ -457,7 +457,7 @@ class PrintaManager:
 		self.ao_days_sb.set_value(days)
 		
 		self.ao_amount_sb.set_value(amount)
-		self.go_quota_limit.set_value(quota_limit)
+		self.ao_quota_limit.set_value(quota_limit)
 		
 		label_str=""
 		if last_set!=None:
@@ -479,7 +479,7 @@ class PrintaManager:
 		current_period=current_day + current_month*31
 		current_status=self.ao_enabled_cb.get_active()
 		#limit quota
-		quota_limit=int(self.go_quota_limit.get_value())
+		quota_limit=int(self.ao_quota_limit.get_value())
 		
 		ret={}
 		ret["amount"]=current_amount
@@ -516,7 +516,7 @@ class PrintaManager:
 		self.ao_amount_sb.connect("changed",self.ao_spinbuttons_changed)
 		self.ao_months_sb.connect("changed",self.ao_spinbuttons_changed)
 		self.ao_days_sb.connect("changed",self.ao_spinbuttons_changed)
-		self.go_quota_limit.connect("changed",self.ao_spinbuttons_changed)
+		self.ao_quota_limit.connect("changed",self.ao_spinbuttons_changed)
 		
 	#def connect_signals
 	
