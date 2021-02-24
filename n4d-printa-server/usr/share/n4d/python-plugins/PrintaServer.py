@@ -59,7 +59,7 @@ class PrintaServer:
 	#def startup
 	
 	# ##################################### #
-	#		PRIVATE FUNCTIONS						 #
+	#	PRIVATE FUNCTIONS		#
 	# ##################################### #	
 	
 	def _add_user(self,username):
@@ -289,7 +289,6 @@ class PrintaServer:
 				print("[PrintaServer] Autorefilling quota at %s..."%(self._format_time(self.db["autorefill"]["should_set"])))
 				self.autorefill_thread_working=True
 				self.db["autorefill"]["last_set"]=self.db["autorefill"]["should_set"]
-				# period is in days. let's get seconds
 				self.db["autorefill"]["should_set"]+=self.db["autorefill"]["period"]
 				
 				if len(self.db["autorefill"]["group_filter"])==0:
@@ -300,7 +299,6 @@ class PrintaServer:
 							self.db["users"][user]["quota"]["default"]=self.db["autorefill"]["quota_limit"]
 						else:
 							self.db["users"][user]["quota"]["default"]=new_amount
-
 				
 				self.save_db_variable()
 				self.autorefill_thread_working=False
@@ -340,7 +338,7 @@ class PrintaServer:
 	#def _get_notify_ip
 	
 	# ##################################### #
-	# 		AUTO REFILL OPERATIONS					 #
+	# 	AUTO REFILL OPERATIONS		#
 	# ##################################### #
 	
 	def get_autorefill_options(self):
@@ -390,7 +388,7 @@ class PrintaServer:
 	#def set_autorefill_options
 	
 	# ##################################### #
-	#		VARIABLES OPERATIONS					 #
+	#	VARIABLES OPERATIONS		#
 	# ##################################### #
 
 	def save_requests_variable(self,variable=None):
@@ -420,7 +418,7 @@ class PrintaServer:
 	#def save_db_variable
 	
 	# ##################################### #
-	#		USER/PRINTER DB OPERATIONS				 #
+	#	 USER/PRINTER DB OPERATIONS	#
 	# ##################################### #
 	
 	def get_user_info(self,user):
@@ -657,7 +655,7 @@ class PrintaServer:
 	#def is_job_printable
 	
 	# ##################################### #
-	#		REQUESTS OPERATIONS					 #
+	#	REQUESTS OPERATIONS		#
 	# ##################################### #	
 	
 	def add_request(self,printa_backend_ip,client_ip,user,info): 
@@ -715,7 +713,6 @@ class PrintaServer:
 						
 						if status=="completed":
 							
-							#is_job_printable(self,user,job_info):
 							# lets make sure we can complete the job
 							ret=self.is_job_printable(user,r["job_info"])
 							if ret["status"]:
@@ -764,7 +761,7 @@ class PrintaServer:
 	#def validate_request
 	
 	# ##################################### #
-	#		PRINTER QUERIES							 #
+	#	PRINTER QUERIES			#
 	# ##################################### #
 	
 	def get_printers(self):
@@ -867,8 +864,10 @@ class PrintaServer:
 	
 	def validate_ticket(self):
 		
-		# harmless call to check if ticket is valid or not. N4D should handle this.
-		# if we don't get here, printa-client needs to request a fresh new ticket
+		# Harmless call to check if ticket is valid or not. N4D Core 
+		# should handle authentication and let this call in. 
+		# If we don't get here,  printa-client needs to request a fresh
+		# new ticket.
 		
 		return {"status":True,"msg":""}
 		
@@ -876,7 +875,7 @@ class PrintaServer:
 	
 	
 	# ######################### #
-	# 	USER QUERIES				   #
+	# 	USER QUERIES	    #
 	# ######################### #
 	
 	def get_user_history(self,user):
@@ -894,8 +893,8 @@ class PrintaServer:
 	
 	def get_own_history(self,user):
 		
-		# user arg is protected by n4d. 
-		# auth user
+		# user arg is protected. Regular users can only get their
+		# own print  history
 		
 		return self.get_user_history(user)
 		
