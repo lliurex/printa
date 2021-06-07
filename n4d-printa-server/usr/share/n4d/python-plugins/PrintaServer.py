@@ -1,6 +1,7 @@
 import copy
 import time
-import xmlrpclib
+import xmlrpc.client
+import ssl
 import cups
 import pwd
 import grp
@@ -12,7 +13,27 @@ import shutil
 import threading
 import codecs
 
+import n4d.server.core
+import n4d.responses
+
 class PrintaServer:
+
+	
+	FREE_PASS=1
+	ENOUGH_QUOTA=2
+	
+	USER_LOCKED=-1
+	NOT_ENOUGH_QUOTA=-2
+	AUTOREFILL_OPTIONS_ERROR=-5
+	NOT_A_VALID_USER_ERROR=-10
+	UNKNOWN_PRINTER_ERROR=-15
+	NOT_A_VALID_USER_ERROR=-20
+	INVALID_FLAG_COMBINATION_ERROR=-30
+	REQUEST_NOT_FOUND_ERROR=-40
+	GET_PRINTERS_ERROR=-50
+	PRINTER_ALREADY_CONTROLLED_ERROR=-60
+	PRINTER_NOT_CONTROLLED_ERROR=-70
+	UNKNOWN_USER_ERROR=-80
 	
 	def __init__(self):
 		
@@ -26,18 +47,19 @@ class PrintaServer:
 		self._check_history_file()
 		self.autorefill_thread=threading.Thread()
 		self.autorefill_thread_working=False
+		self.core=n4d.server.core.Core.get_core()
 		
 	#def init
 	
 	def startup(self,options):
 
-		self.requests_variable=copy.deepcopy(objects["VariablesManager"].get_variable("PRINTAREQUESTS"))
+		self.requests_variable=self.core.get_variable("PRINTAREQUESTS")["return"]
 
 		if self.requests_variable == None:
 			self.requests_variable = {}
-			objects["VariablesManager"].add_variable("PRINTAREQUESTS",copy.deepcopy(self.requests_variable),"","Printa current requests - Volatile","printa",True)
+			self.core.set_variable("PRINTAREQUESTS",self.requests_variable,{"info":"Printa current requests - Volatile","volatile":True})
 		
-		self.db=copy.deepcopy(objects["VariablesManager"].get_variable("PRINTADB"))
+		self.db=self.core.get_variable("PRINTADB")["return"]
 		
 		if self.db == None:
 			self.db = {}
@@ -51,7 +73,7 @@ class PrintaServer:
 			self.db["autorefill"]["should_set"]=None
 			self.db["autorefill"]["amount"]=0
 			self.db["autorefill"]["group_filter"]=[]
-			objects["VariablesManager"].add_variable("PRINTADB",copy.deepcopy(self.db),"","Printa User and Printer data","printa")
+			self.core.set_variable("PRINTADB",self.db,{"info":"Printa User and Printer data"})
 			
 		if self.db["autorefill"]["enabled"]:
 			self._start_autorefill_loop()
@@ -337,13 +359,27 @@ class PrintaServer:
 		
 	#def _get_notify_ip
 	
+	def _get_group_members(self,group):
+			
+		ret=[]
+		try:
+			ginfo=grp.getgrnam(group)
+			ret=ginfo.gr_mem
+		except Exception as e:
+			print(e)
+				
+		return ret
+			
+	#def get_group_members
+	
 	# ##################################### #
 	# 	AUTO REFILL OPERATIONS		#
 	# ##################################### #
 	
 	def get_autorefill_options(self):
 		
-		return {"status": True, "msg": self.db["autorefill"]}
+		return n4d.build_successful_call_response(self.db["autorefill"])
+		#return {"status": True, "msg": self.db["autorefill"]}
 		
 	#def get_autorefill_options
 	
@@ -360,8 +396,9 @@ class PrintaServer:
 			self._kill_autorefill_loop()
 		else:
 			self._start_autorefill_loop()
-
-		return {"status":True,"msg":""}
+		
+		return n4d.responses.build_successful_call_response()
+		#return {"status":True,"msg":""}
 		
 	#def set_autorefill_status
 	
@@ -380,10 +417,13 @@ class PrintaServer:
 			
 			if restart:
 				self._restart_autorefill_loop()
+		
+			return n4d.responses.build_sucessful_call_response()
+			#return {"status": True, "msg": ""}
 			
-			return {"status": True, "msg": ""}
 		except Exception as e:
-			return {"status": False, "msg":str(e)}
+			return n4d.responses.build_failed_call_response(PrintaServer.AUTOREFILL_OPTIONS_ERROR,str(e))
+			#return {"status": False, "msg":str(e)}
 		
 	#def set_autorefill_options
 	
@@ -398,9 +438,11 @@ class PrintaServer:
 		else:
 			self.requests_variable=copy.deepcopy(variable)
 
-		objects["VariablesManager"].set_variable("PRINTAREQUESTS",variable)
+		#objects["VariablesManager"].set_variable("PRINTAREQUESTS",variable)
+		self.core.set_variable("PRINTAREQUESTS",variable)
 		
-		return {"status":True,"msg":""}
+		return n4d.responses.build_successful_call_response()
+		#return {"status":True,"msg":""}
 		
 	#def save_variable
 
@@ -412,8 +454,11 @@ class PrintaServer:
 		else:
 			self.db=copy.deepcopy(variable)
 			
-		objects["VariablesManager"].set_variable("PRINTADB",variable)
-		return {"status":True,"msg":""}
+		#objects["VariablesManager"].set_variable("PRINTADB",variable)
+		self.core.set_variable("PRINTADB",variable)
+		
+		return n4d.responses.build_successful_call_response()
+		#return {"status":True,"msg":""}
 	
 	#def save_db_variable
 	
@@ -424,7 +469,8 @@ class PrintaServer:
 	def get_user_info(self,user):
 		
 		if not self._is_valid_user(user):
-			return {"status":False,"msg":"Not a valid user"}
+			return n4d.responses.build_failed_call_response(PrintaServer.NOT_A_VALID_USER_ERROR,"Not a valid user")
+			#return {"status":False,"msg":"Not a valid user"}
 		
 		if user not in self.db["users"]:
 			self._add_user(user)
@@ -436,29 +482,31 @@ class PrintaServer:
 		if user in h:
 			user_data["history"]=h[user]
 		
-		return {"status":True,"msg":user_data}
+		return n4d.responses.build_successful_call_response(user_data)
+		#return {"status":True,"msg":user_data}
 		
 	#def get_user_info
 	
 	def get_user_quota(self,user,printer="default"):
 	
 		if not self._is_valid_user(user):
-			return {"status":False,"msg":"Not a valid user"}
+			return n4d.responses.build_failed_call_response(PrintaServer.NOT_A_VALID_USER_ERROR,"Not a valid user")
 		
 		if user not in self.db["users"]:
 			self._add_user(user)
 			
 		if printer!="default" and printer not in self.db["printers"]:
-			return {"status":False,"msg":"Unknown printer"}
-			
-		return {"status":True,"msg":self.db["users"][user]["quota"][printer]}
+			return n4d.responses.build_failed_call_response(PrintaServer.UNKNOWN_PRINTER_ERROR,"Unknown printer")
+		
+		return n4d.responses.build_successful_call_response(self.db["users"][user]["quota"][printer])
+		#return {"status":True,"msg":self.db["users"][user]["quota"][printer]}
 	
 	#def get_user_quota
 	
 	def add_to_user_quota(self,user,add_value,printer="default"):
 		
 		if not self._is_valid_user(user):
-			return {"status":False,"msg":"Not a valid user"}
+			return n4d.responses.build_failed_call_response(PrintaServer.NOT_A_VALID_USER_ERROR,"Not a valid user")
 		
 		if user not in self.db["users"]:
 			self._add_user(user)
@@ -471,16 +519,18 @@ class PrintaServer:
 				self.db["users"][user]["quota"][printer]=0
 				
 			self.save_db_variable()
-			return {"status":True, "msg":""}
+			return n4d.responses.build_successful_call_response()
+			#return {"status":True, "msg":""}
 		else:
-			return {"status":False,"msg":"Unknown printer"}
+			return n4d.responses.build_failed_call_response(PrintaServer.UNKNOWN_PRINTER_ERROR,"Unknown printer")
+			#return {"status":False,"msg":"Unknown printer"}
 		
 	#def add_to_user_quota
 	
 	def set_user_quota(self,user,quota_value,printer="default"):
 		
 		if not self._is_valid_user(user):
-			return {"status":False,"msg":"Not a valid user"}		
+			return n4d.responses.build_failed_call_response(PrintaServer.NOT_A_VALID_USER_ERROR,"Not a valid user")		
 		
 		if user not in self.db["users"]:
 			self._add_user(user)
@@ -493,53 +543,57 @@ class PrintaServer:
 				self.db["users"][user]["quota"][printer]=0
 				
 			self.save_db_variable()
-			return {"status":True, "msg":""}
+			return n4d.responses.build_successful_call_response()
+			#return {"status":True, "msg":""}
 			
 		else:
-			return {"status":False, "msg":"Unknown printer"}
+			return n4d.responses.build_failed_call_response(PrintaServer.UNKNOWN_PRINTER_ERROR,"Unknown printer")
+			#return {"status":False, "msg":"Unknown printer"}
 			
 	#def set_user_quota
 	
 	def set_user_freepass(self,user,state):
 		
 		if not self._is_valid_user(user):
-			return {"status":False,"msg":"Not a valid user"}
+			return n4d.responses.build_failed_call_response(PrintaServer.NOT_A_VALID_USER_ERROR,"Not a valid user")	
 		
 		if user not in self.db["users"]:
 			self._add_user(user)
 			
 		if type(state)!=bool:
-			return {"status":False,"msg":"Unknown state %s"%state}
+			return n4d.responses.build_failed_call_response(PrintaServer.NOT_A_VALID_USER_ERROR,"Unknown state: %s"%state)	
+			#return {"status":False,"msg":"Unknown state %s"%state}
 			
 		self.db["users"][user]["free_pass"]=state
 		self.save_db_variable()
 		
-		return {"status":True,"msg":""}
+		return n4d.responses.build_successful_call_response()
+		#return {"status":True,"msg":""}
 		
 	#def set_free_pass
 	
 	def set_user_locked(self,user,state):
 		
 		if not self._is_valid_user(user):
-			return {"status":False,"msg":"Not a valid user"}
+			return n4d.responses.build_failed_call_response(PrintaServer.NOT_A_VALID_USER_ERROR,"Not a valid user")	
 		
 		if user not in self.db["users"]:
 			self._add_user(user)
 			
 		if type(state)!=bool:
-			return {"status":False,"msg":"Unknown state %s"%state}
+			return n4d.responses.build_failed_call_response(PrintaServer.NOT_A_VALID_USER_ERROR,"Unknown state: %s"%state)	
 			
 		self.db["users"][user]["locked"]=state
 		self.save_db_variable()
 		
-		return {"status":True,"msg":""}
+		return n4d.responses.build_successful_call_response()
 		
 	#def set_free_pass
 	
 	def set_user_info(self,user,quota,locked,free_pass):
 		
 		if not self._is_valid_user(user):
-			return {"status":False,"msg":"Not a valid user"}
+			return n4d.responses.build_failed_call_response(PrintaServer.NOT_A_VALID_USER_ERROR,"Not a valid user")	
 		if user not in self.db["users"]:
 			self._add_user(user)
 			
@@ -550,107 +604,138 @@ class PrintaServer:
 
 		self.save_db_variable()
 
-		return {"status":True,"msg":""}
+		return n4d.responses.build_successful_call_response()
 		
 	#def set_user_info
 	
 	def add_to_group_quota(self,group,add_value,printer="default"):
 
-		users=self.get_group_members(group)
+		users=self._get_group_members(group)
 		ret={}
 		
 		for user in users:
-			uret=self.add_to_user_quota(user,add_value,printer)
+			tmp=self.add_to_user_quota(user,add_value,printer)
+			if tmp["status"]==0:
+				uret=tmp["return"]
+			else:
+				uret=False
 			ret[user]=uret
 				
-		return {"status":True,"msg":ret}		
+		#return {"status":True,"msg":ret}		
+		return n4d.responses.build_successful_call_response(ret)
 		
 	#def add_to_group_quota
 	
 	
 	def set_group_quota(self,group,quota,printer="default"):
 		
-		users=self.get_group_members(group)
+		users=self._get_group_members(group)
 		ret={}
 		
 		for user in users:
-			uret=self.set_user_quota(user,quota,printer)
+			tmp=self.set_user_quota(user,quota,printer)
+			if tmp["status"]==0:
+				uret=tmp["return"]
+			else:
+				uret=False
 			ret[user]=uret
 				
-		return {"status":True,"msg":ret}
+		#return {"status":True,"msg":ret}
+		return n4d.responses.build_successful_call_response(ret)
 		
 	#def set_group_info
 	
 	def set_group_freepass(self,group,free_pass):
 		
-		users=self.get_group_members(group)
+		users=self._get_group_members(group)
 		ret={}
 		
 		for user in users:
-			uret=self.set_user_free_pass(user,free_pass)
+			tmp=self.set_user_free_pass(user,free_pass)
+			if tmp["status"]==0:
+				uret=tmp["return"]
+			else:
+				uret=False
 			ret[user]=uret
 				
-		return {"status":True,"msg":ret}
+		return n4d.responses.build_successful_call_response(ret)
 		
 	#def set_group_free_pass
 	
 	def set_group_locked(self,group,locked):
 		
-		users=self.get_group_members(group)
+		users=self._get_group_members(group)
 		ret={}
 		
 		for user in users:
-			uret=self.set_user_locked(user,locked)
+			tmp=self.set_user_locked(user,locked)
+			if tmp["status"]==0:
+				uret=tmp["return"]
+			else:
+				uret=False
 			ret[user]=uret
 				
-		return {"status":True,"msg":ret}
+		return n4d.responses.build_successful_call_response(ret)
 		
 	#def set_group_free_pass
 	
 	def set_group_flag(self,group,locked,freepass):
 		
 		if locked and freepass:
-			return {"status":False,"msg":"Invalid flag combination"}
+			return n4d.responses.build_failed_call_response(PrintaServer.INVALID_FLAG_COMBINATION_ERROR,"Invalid flag combination")
+			#return {"status":False,"msg":"Invalid flag combination"}
 		
-		users=self.get_group_members(group)
+		users=self._get_group_members(group)
 		ret={}
 		for user in users:
-			ret1=self.set_user_locked(user,locked)
-			ret2=self.set_user_freepass(user,freepass)
+			tmp=self.set_user_locked(user,locked)
+			if tmp["status"]==0:
+				ret1=tmp["return"]
+			else:
+				ret1=False
+			tmp=self.set_user_freepass(user,freepass)
+			if tmp["status"]==0:
+				ret2=tmp["return"]
+			else:
+				ret2=False
 			ret[user]=[]
 			ret[user].append(ret1)
 			ret[user].append(ret2)
 			
-		return {"status":True,"msg":ret}
+		return n4d.responses.build_successful_call_response(ret)
 			
 		
 	#def set_group_flag
 	
 	def is_job_printable(self,user,job_info):
 		
-		USER_LOCKED=-1
-		NOT_ENOUGH_QUOTA=-2
-		FREE_PASS=1
-		ENOUGH_QUOTA=2
+		#USER_LOCKED=-1
+		#NOT_ENOUGH_QUOTA=-2
+		#FREE_PASS=1
+		#ENOUGH_QUOTA=2
 		
 		pages=self._get_job_pages(job_info)
 		
 		if not self._is_valid_user(user):
-			return {"status":False,"msg":"Not a valid user"}
+			return n4d.responses.build_failed_call_response(PrintaServer.NOT_A_VALID_USER_ERROR,"Not a valid user")	
 		
 		if user not in self.db["users"]:
 			self._add_user(user)
 
 		if self.db["users"][user]["locked"]:
-			return {"status":False,"msg":USER_LOCKED}
+			return n4d.responses.build_failed_call_response(PrintaServer.USER_LOCKED,"User locked")	
+			#return {"status":False,"msg":USER_LOCKED}
 		
 		if self.db["users"][user]["free_pass"]:
-			return {"status":True,"msg":FREE_PASS}
+			return n4d.responses.build_successful_call_response(PrintaServer.FREE_PASS,"Free pass")	
+			#return {"status":True,"msg":FREE_PASS}
 			
 		if self.db["users"][user]["quota"]["default"] > pages:
-			return {"status":True,"msg":ENOUGH_QUOTA}
-			
-		return {"status": False, "msg": NOT_ENOUGH_QUOTA}
+			return n4d.responses.build_successful_call_response(PrintaServer.ENOUGH_QUOTA,"Enough quota")	
+			#return {"status":True,"msg":ENOUGH_QUOTA}
+		
+		return n4d.responses.build_failed_call_response(PrintaServer.NOT_ENOUGH_QUOTA,"Not enough quota")	
+		#return {"status": False, "msg": NOT_ENOUGH_QUOTA}
 		
 	#def is_job_printable
 	
@@ -672,7 +757,7 @@ class PrintaServer:
 		client=xmlrpclib.ServerProxy("https://%s:9779"%printa_backend_ip)
 		try:
 
-			cret=client.validate_request("","PrintaServer",id,t)
+			cret=client.validate_request("","PrintaServer",id,t)["return"]
 			if cret:
 				
 				notify_ip=self._get_notify_ip(printa_backend_ip,client_ip)
@@ -689,17 +774,19 @@ class PrintaServer:
 				ret["msg"]="Unknown request"
 			
 		except Exception as e:
-			print e
+			print(e)
 			ret["status"]=False
 			ret["msg"]=str(e)
 		
-		return ret
+		return n4d.responses.build_successful_call_response(ret)
+		#return ret
 		
 	#def add_request
 	
 	def get_request_var(self):
 		
-		return {"status":True,"msg":self.requests_variable}
+		return n4d.responses.build_successful_call_response(self.requests_variable)
+		#return {"status":True,"msg":self.requests_variable}
 		
 	#def get_request_var
 	
@@ -715,17 +802,20 @@ class PrintaServer:
 							
 							# lets make sure we can complete the job
 							ret=self.is_job_printable(user,r["job_info"])
-							if ret["status"]:
+							if ret["status"]==0:
 								if not self.db["users"][user]["free_pass"]:
 									self.add_to_user_quota(user,r["job_info"]["pages"]*-1)
 							else:
-								return {"status": False, "msg":ret["msg"]}
+								return n4d.responses.build_failed_call_response(ret["status"],ret["msg"])
+								#return {"status": False, "msg":ret["msg"]}
 						
 						self._add_job_to_history(r["job_info"])
 						self.save_requests_variable()
-						return {"status":True,"msg":""}
-			
-		return {"status":False,"msg":"Request not found"}
+						return n4d.responses.build_successful_call_response()
+						#return {"status":True,"msg":""}
+		
+		return n4d.responses.build_failed_call_response(PrintaServer.REQUEST_NOT_FOUND_ERROR,"Request not found")
+		#return {"status":False,"msg":"Request not found"}
 		
 	#def commit_request
 	
@@ -736,9 +826,11 @@ class PrintaServer:
 				for r in self.requests_variable[ip][user]:
 					if r["job_info"]["id"]==id:
 						status=r["job_info"]["status"]
-						return {"status":True,"msg":status}
+						return n4d.responses.build_successful_call_response(status)
+						#return {"status":True,"msg":status}
 			
-		return {"status":False,"msg":"Request not found"}
+		#return {"status":False,"msg":"Request not found"}
+		return n4d.responses.build_failed_call_response(PrintaServer.REQUEST_NOT_FOUND_ERROR,"Request not found")
 		
 	#def get_request_status
 
@@ -756,7 +848,8 @@ class PrintaServer:
 			if ts==str(timestamp):
 				ret=True
 		
-		return ret
+		return n4d.responses.build_successful_call_response(ret)
+		#return ret
 		
 	#def validate_request
 	
@@ -771,56 +864,62 @@ class PrintaServer:
 		try:
 			con=cups.Connection()
 			printers=con.getPrinters()
-			return {"status":True,"msg":printers}
+			return n4d.responses.build_successful_call_response(printer)
+			#return {"status":True,"msg":printers}
 		except Exception as e:
-			return {"status":False,"msg":str(e)}
+			return n4d.responses.build_failed_call_response(PrintaServer.GET_PRINTERS_ERROR,str(e))
+			#return {"status":False,"msg":str(e)}
 		
 	#def get_printers
 	
 	def get_controlled_printers(self):
 		
 		ret=self.get_printers()
-		if ret:
+		if ret["status"]==0:
 			printers={}
-			for printer in ret["msg"]:
-				if "printa:" in ret["msg"][printer]["device-uri"]:
-					printers[printer]=ret["msg"][printer]["device-uri"]
-					
-			return {"status":True,"msg":printers}
+			for printer in ret["return"]:
+				if "printa:" in ret["return"][printer]["device-uri"]:
+					printers[printer]=ret["return"][printer]["device-uri"]
+			
+			return n4d.responses.build_successful_call_response(printers)
+			#return {"status":True,"msg":printers}
 		else:
-			return {"status":False, "msg":"Failed to get printers: %s"%ret["msg"]}
+			return n4d.responses.build_failed_call_response(PrintaServer.GET_PRINTERS_ERROR,ret["msg"])
+			#return {"status":False, "msg":"Failed to get printers: %s"%ret["msg"]}
 		
 	#def get_controlled_printers
 	
 	def get_non_controlled_printers(self):
 		
 		ret=self.get_printers()
-		if ret:
+		if ret["status"]==0:
 			printers={}
-			for printer in ret["msg"]:
-				if "printa:" not in ret["msg"][printer]["device-uri"]:
-					printers[printer]=ret["msg"][printer]["device-uri"]
-					
-			return {"status":True,"msg":printers}
+			for printer in ret["return"]:
+				if "printa:" not in ret["return"][printer]["device-uri"]:
+					printers[printer]=ret["return"][printer]["device-uri"]
+			
+			return n4d.responses.build_successful_call_response(printers)
+			#return {"status":True,"msg":printers}
 		else:
-			return {"status":False, "msg":"Failed to get printers: %s"%ret["msg"]}
+			return n4d.responses.build_failed_call_response(PrintaServer.GET_PRINTERS_ERROR,ret["msg"])
+			#return {"status":False, "msg":"Failed to get printers: %s"%ret["msg"]}
 		
 	#def get_non_controlled_printers
 	
 	def enable_control(self,printer_name):
 		
 		ret =self.get_controlled_printers()
-		if ret["status"]:
-			controlled_printers=ret["msg"]
+		if ret["status"]==0:
+			controlled_printers=ret["return"]
 		else:
-			return {"status":False, "msg": "Failed to get printers" }
+			return n4d.responses.build_failed_call_response(PrintaServer.GET_PRINTERS_ERROR,ret["msg"])
 			
 		if printer_name not in controlled_printers:
 			ret = self.get_non_controlled_printers()
 			if ret:
 				current_devices = ret["msg"]
 			else:
-				return {"status":False, "msg": "Failed to get printers" }
+				return n4d.responses.build_failed_call_response(PrintaServer.UNKNOWN_PRINTER_ERROR,"Unknown printer")
 				
 			if printer_name in current_devices:
 				
@@ -830,23 +929,26 @@ class PrintaServer:
 				con.setPrinterDevice(printer_name,new_uri)
 				self._add_printer(printer_name)
 				
-				return {"status":True,"msg":""}
+				return n4d.responses.build_successful_call_response()
+				#return {"status":True,"msg":""}
 				
 			else:
-				return {"status": False, "msg":"Unknown printer"}
+				return n4d.responses.build_failed_call_response(PrintaServer.UNKNOWN_PRINTER_ERROR,"Unknown printer")
 			
 		else:
-			return {"status":False,"msg":"Printer already controlled"}
+			return n4d.responses.failed_call_response(PrintaServer.PRINTER_ALREADY_CONTROLLED_ERROR,"Printer already controlled")
+			#return {"status":False,"msg":"Printer already controlled"}
 		
 	#def enable_control
 	
 	def disable_control(self,printer_name):
 		
 		ret =self.get_controlled_printers()
-		if ret["status"]:
-			controlled_printers=ret["msg"]
+		if ret["status"]==0:
+			controlled_printers=ret["return"]
 		else:
-			return {"status":False, "msg": "Failed to get printers" }
+			return n4d.responses.build_failed_call_response(PrintaServer.GET_PRINTERS_ERROR,ret["msg"])
+			#return {"status":False, "msg": "Failed to get printers" }
 			
 		if printer_name in controlled_printers:
 				
@@ -855,21 +957,25 @@ class PrintaServer:
 			con=cups.Connection()
 			con.setPrinterDevice(printer_name,new_uri)
 			self._remove_printer(printer_name)
-			return {"status":True,"msg":""}
+			return n4d.responses.build_successful_call_response()
+			#return {"status":True,"msg":""}
 				
 		else:
-			return {"status":False,"msg":"Printer not controlled. Nothing to do"}
+			return n4d.responses.failed_call_response(PrintaServer.PRINTER_NOT_CONTROLLED_ERROR,"Printer not controlled")
+			
+			#return {"status":False,"msg":"Printer not controlled. Nothing to do"}
 		
 	#def disable_control
 	
 	def validate_ticket(self):
 		
-		# Harmless call to check if ticket is valid or not. N4D Core 
-		# should handle authentication and let this call in. 
-		# If we don't get here,  printa-client needs to request a fresh
-		# new ticket.
+		# Harmless call allowed to every authenticated user to check if
+		# ticket is valid or not.  N4D itself should handle 
+		# authentication and let this call in.  If we don't get here,  
+		# printa-client needs to request a fresh new ticket.
 		
-		return {"status":True,"msg":""}
+		return n4d.responses.build_successful_call_response()
+		#return {"status":True,"msg":""}
 		
 	#def 
 	
@@ -885,9 +991,12 @@ class PrintaServer:
 			ret=[]
 			if user in h:
 				ret=h[user]
-			return {"status": True, "msg": ret }
+			
+			return n4d.responses.build_successful_call_response(ret)
+			#return {"status": True, "msg": ret }
 		
-		return {"status":False,"msg":"Unknown user"}
+		return n4d.responses.build_failed_call_response(PrintaServer.UNKNOWN_USER_ERROR,"Unknown user")
+		#return {"status":False,"msg":"Unknown user"}
 		
 	#def get_user_history
 	
@@ -913,8 +1022,9 @@ class PrintaServer:
 				u["name"]=user.pw_name
 				u["gecos"]=user.pw_gecos
 				ret_list.append(u)
-				
-		return {"status":True,"msg":ret_list}	
+		
+		return n4d.responses.build_successful_call_response(ret_list)
+		#return {"status":True,"msg":ret_list}	
 		
 	#def get_user_list
 	
@@ -945,23 +1055,10 @@ class PrintaServer:
 				ret_list.append(group)
 		
 		
-		return {"status":True, "msg":ret_list}
+		return n4d.responses.build_successful_call_response(ret_list)
+		#return {"status":True, "msg":ret_list}
 		
 	#def get_group_list
 		
-	def get_group_members(self,group):
-			
-		ret=[]
-		try:
-			ginfo=grp.getgrnam(group)
-			ret=ginfo.gr_mem
-		except Exception as e:
-			print e
-				
-		return ret
-			
-	#def get_group_members
-		
-
 	
 #class PrintaServer
