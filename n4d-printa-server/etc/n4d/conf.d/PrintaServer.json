@@ -1,0 +1,184 @@
+{
+    "SETUP": {
+        "type": "python",
+        "path": "PrintaServer.py",
+        "class": "PrintaServer"
+    },
+    "METHODS": {
+        "get_autorefill_options": {
+            "allowed_groups": [
+                "anonymous"
+            ]
+        },
+        "set_autorefill_status": {
+            "allowed_groups": [
+                "sudo",
+                "admins"
+            ]
+        },
+        "set_autorefill_options": {
+            "allowed_groups": [
+                "sudo",
+                "admins"
+            ]
+        },
+        "get_user_info": {
+            "allowed_groups": [
+                "sudo",
+                "admins"
+            ]
+        },
+        "get_user_quota": {
+            "allowed_groups": [
+                "*"
+            ],
+	    "protected_user": 0
+        },
+        "add_to_user_quota": {
+            "allowed_groups": [
+                "sudo",
+                "admins"
+            ]
+        },
+        "set_user_quota": {
+            "allowed_groups": [
+                "sudo",
+                "admins"
+            ]
+        },
+        "set_user_freepass": {
+            "allowed_groups": [
+                "sudo",
+                "admins"
+            ]
+        },
+        "set_user_locked": {
+            "allowed_groups": [
+                "sudo",
+                "admins"
+            ]
+        },
+        "set_user_info": {
+            "allowed_groups": [
+                "sudo",
+                "admins"
+            ]
+        },
+        "add_to_group_quota": {
+            "allowed_groups": [
+                "sudo",
+                "admins"
+            ]
+        },
+        "set_group_quota": {
+            "allowed_groups": [
+                "sudo",
+                "admins"
+            ]
+        },
+        "set_group_freepass": {
+            "allowed_groups": [
+                "sudo",
+                "admins"
+            ]
+        },
+        "set_group_locked": {
+            "allowed_groups": [
+                "sudo",
+                "admins"
+            ]
+        },
+        "set_group_flag": {
+            "allowed_groups": [
+                "sudo",
+                "admins"
+            ]
+        },
+        "is_job_printable": {
+            "allowed_groups": [
+                "*"
+            ],
+	    "protected_user": 0
+        },
+        "add_request": {
+            "allowed_groups": [
+                "anonymous"
+            ],
+	    "protected_ip": 0
+        },
+        "get_request_var": {
+            "allowed_groups": [
+                "anonymous"
+            ]
+        },
+        "commit_request": {
+            "allowed_groups": [
+                "*"
+            ]
+        },
+        "get_request_status": {
+            "allowed_groups": [
+                "anonymous"
+            ]
+        },
+        "validate_request": {
+            "allowed_groups": [
+                "anonymous"
+            ]
+        },
+        "get_printers": {
+            "allowed_groups": [
+                "anonymous"
+            ]
+        },
+        "get_controlled_printers": {
+            "allowed_groups": [
+                "anonymous"
+            ]
+        },
+        "get_non_controlled_printers": {
+            "allowed_groups": [
+                "anonymous"
+            ]
+        },
+        "enable_control": {
+            "allowed_groups": [
+                "sudo",
+                "admins"
+            ]
+        },
+        "disable_control": {
+            "allowed_groups": [
+                "sudo",
+                "admins"
+            ]
+        },
+        "validate_ticket": {
+            "allowed_groups": [
+                "*"
+            ]
+        },
+        "get_user_history": {
+            "allowed_groups": [
+                "sudo",
+                "admins"
+            ]
+        },
+        "get_own_history": {
+            "allowed_groups": [
+                "*"
+            ],
+	    "protected_user": 0
+        },
+        "get_user_list": {
+            "allowed_groups": [
+                "anonymous"
+            ]
+        },
+        "get_group_list": {
+            "allowed_groups": [
+                "anonymous"
+            ]
+        }
+    }
+}
