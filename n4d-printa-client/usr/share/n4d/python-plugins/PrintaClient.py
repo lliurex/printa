@@ -4,6 +4,7 @@ import time
 import socket
 import pwd
 import n4d.server.core
+import n4d.responses
 
 class PrintaClient:
 	
@@ -79,6 +80,8 @@ class PrintaClient:
 							f.close()
 					except Exception as e:
 						print(e)
+						
+		return n4d.responses.build_successful_call_response()
 			
 		
 	#def request_trigger
