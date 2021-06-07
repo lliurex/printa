@@ -1,0 +1,15 @@
+{
+    "SETUP": {
+        "type": "python",
+        "path": "PrintaClient.py",
+        "class": "PrintaClient"
+    },
+    "METHODS": {
+        "request_trigger": {
+            "allowed_groups": [
+                "sudo",
+                "admins"
+            ]
+        }
+    }
+}
