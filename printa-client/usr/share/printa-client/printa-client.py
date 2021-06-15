@@ -88,12 +88,16 @@ class PrintaClient:
 		ret=c.is_job_printable(u,"PrintaServer","",self.job)
 		dprint("IS_JOB_PRINTABLE:")
 		dprint(ret)
-		can_print=ret["status"]
+		if ret["status"]==0:
+			can_print=True
+		else:
+			can_print=False
+		
 		reason=""
 		if not can_print:
-			if ret["msg"]==USER_LOCKED:
+			if ret["error_code"]==USER_LOCKED:
 				reason="User is locked"
-			elif ret["msg"]==NOT_ENOUGH_QUOTA:
+			elif ret["error_code"]==NOT_ENOUGH_QUOTA:
 				reason="Not enough quota"
 			else:
 				reason=ret["msg"]
@@ -110,8 +114,8 @@ class PrintaClient:
 		ret=c.get_user_quota(u,"PrintaServer","")
 		dprint("USER QUOTA:")
 		dprint(ret)
-		if ret["status"]:
-			return ret["msg"]
+		if ret["status"]==0:
+			return ret["return"]
 		else:
 			return -1
 		
@@ -122,8 +126,10 @@ class PrintaClient:
 		context=ssl._create_unverified_context()
 		c=xmlrpc.client.ServerProxy("https://%s:9779"%self.remote_server,allow_none=True,context=context)
 		ret=c.get_request_var("","PrintaServer")
+		if ret["status"]==0:
+			return ret["return"]
 		
-		return ret
+		return None
 		
 	#def get_requests_variable
 	
@@ -131,9 +137,10 @@ class PrintaClient:
 	
 		context=ssl._create_unverified_context()
 		c=xmlrpc.client.ServerProxy("https://localhost:9779",allow_none=True,context=context)
-		v=c.get_variable("","VariablesManager","PRINTASERVER")
-		if v!=None:
-			return v
+		ret=c.get_variable("PRINTASERVER")
+		if ret["status"]==0
+			if ret["return"]!=None:
+				return ret["return"]
 		return "127.0.0.1"
 		
 	#def get_printa_config_variable
@@ -148,7 +155,7 @@ class PrintaClient:
 			ret=c.validate_ticket(u,"PrintaServer")
 			
 			if type(ret)==dict:
-				if ret["status"]:
+				if ret["status"]==0:
 					return True
 				
 		# not a valid ticket. Requesting a new one and forcing user and password dialog
@@ -182,10 +189,7 @@ class PrintaClient:
 		
 		dprint("Got PRINTAREQUESTS variable change...")
 		
-		ret=self.get_requests_variable()
-
-		if ret["status"]:
-			v=ret["msg"]
+		v=self.get_requests_variable()
 		
 		msgs=[]
 		

@@ -20,10 +20,10 @@ class N4dManager:
 	def get_service_variables(self):
 		
 		client=xmlrpc.client.ServerProxy("https://localhost:9779",allow_none=True,context=ssl._create_unverified_context())
-		var=client.get_variable("","VariablesManager","PRINTASERVER")
+		ret=client.get_variable("PRINTASERVER")
 		self.printa_server="localhost"
 		
-		if var!=None:
+		if ret["status"]==0 and ret["return"]!=None:
 			self.printa_server=var
 		else:
 			self.printa_server="127.0.0.1"

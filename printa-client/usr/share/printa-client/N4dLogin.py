@@ -69,9 +69,9 @@ class N4dLogin:
 		
 		dprint("Validating user...")
 		try:
-			status,groups=self.client.validate_user(u,p)
-			dprint(status)
-			if status:
+			ret=self.client.validate_user(u,p)
+			#dprint(status)
+			if ret["status"]==0:
 				return True
 			return False
 		except:
@@ -84,7 +84,9 @@ class N4dLogin:
 		dprint("Validating ticket...")
 		try:
 			ret=self.client.validate_ticket((u,t),"PrintaServer")
-			return ret["status"]
+			if ret["status"]==0:
+				return True
+			return False
 		except:
 			return False
 		
@@ -95,8 +97,11 @@ class N4dLogin:
 	
 		try:
 			dprint("Asking %s to create a ticket..."%self.server)
-			ret=self.client.create_ticket("","NTicketsManager",self.user)
-			return True
+			ret=self.create_ticket(self.user)
+			if ret["status"]==0:
+				return True
+			return False
+			
 		except:
 			return False
 	
@@ -106,13 +111,16 @@ class N4dLogin:
 	def read_ticket_from_server(self,u,p):
 		try:
 			dprint("Reading remote ticket...")
-			t=self.client.get_ticket((u,p),"NTicketsManager",self.user)
-			remote_ticket_path="/run/user/%s/printa/%s.n4d"%(self.uid,self.user)
-			f=open(remote_ticket_path,"w")
-			f.write(t)
-			f.close()
-			os.chmod(remote_ticket_path,0o400)
-			return t
+			ret=self.get_ticket(u,p)
+			if ret["status"]==0:
+				t=ret["return"]
+				remote_ticket_path="/run/user/%s/printa/%s.n4d"%(self.uid,self.user)
+				f=open(remote_ticket_path,"w")
+				f.write(t)
+				f.close()
+				os.chmod(remote_ticket_path,0o400)
+				return t
+			return False
 	
 		except Exception as e:
 			dprint(str(e))

@@ -37,7 +37,11 @@ class N4dManager:
 	def get_printa_server(self):
 		
 		client=xmlrpc.client.ServerProxy("https://localhost:9779",allow_none=True,context=ssl._create_unverified_context())
-		printa_server=client.get_variable("","VariablesManager","PRINTASERVER")
+		ret=client.get_variable("PRINTASERVER")
+		if ret["status"]==0:
+			printa_server=ret["return"]
+		else:
+			printa_server=None
 		
 		if printa_server==None:
 			printa_server="127.0.0.1"
@@ -59,9 +63,9 @@ class N4dManager:
 		
 		try:
 			ret=self.client.get_user_list("","PrintaServer")
-			if ret["status"]:
+			if ret["status"]==0:
 				#dprint("get_user_list success")
-				return ret["msg"]
+				return ret["return"]
 			else:
 				dprint("[!] get_user_list failed")
 				return []
@@ -76,9 +80,9 @@ class N4dManager:
 		
 		try:
 			ret=self.client.get_group_list("","PrintaServer")
-			if ret["status"]:
+			if ret["status"]==0:
 				#dprint("get_group_list success")
-				return ret["msg"]
+				return ret["return"]
 			else:
 				dprint("[!] get_group_list failed")
 				return []
@@ -92,9 +96,9 @@ class N4dManager:
 		
 		try:
 			ret=self.client.get_user_info(self.auth,"PrintaServer",user)
-			if ret["status"]:
+			if ret["status"]==0:
 				#dprint("get_user_info success %s"%user)
-				return ret["msg"]
+				return ret["return"]
 			else:
 				dprint("[!] get_user_info failed")
 				return Noine
@@ -109,7 +113,7 @@ class N4dManager:
 		try:
 			ret=self.client.set_user_info(self.auth,"PrintaServer",user,quota,locked,freepass)
 			
-			if ret["status"]:
+			if ret["status"]==0:
 				#dprint("set_user_info success")
 				return True
 			else:
@@ -126,7 +130,7 @@ class N4dManager:
 		try:
 			ret=self.client.set_group_quota(self.auth,"PrintaServer",group,quota,printer)
 			
-			if ret["status"]:
+			if ret["status"]==0:
 				#dprint("set_group_quota success")
 				return True
 			else:
@@ -142,7 +146,7 @@ class N4dManager:
 		
 		try:
 			ret=self.client.add_to_group_quota(self.auth,"PrintaServer",group,add_value,printer)
-			if ret["status"]:
+			if ret["status"]==0:
 				#dprint("add_to_group_quota success")
 				return True
 			else:
@@ -159,7 +163,7 @@ class N4dManager:
 		try:
 			ret=self.client.set_group_locked(self.auth,"PrintaServer",group,locked)
 			
-			if ret["status"]:
+			if ret["status"]==0:
 				#dprint("set_group_locked success")
 				return True
 			else:
@@ -176,7 +180,7 @@ class N4dManager:
 		try:
 			ret=self.client.set_group_freepass(self.auth,"PrintaServer",group,freepass)
 			
-			if ret["status"]:
+			if ret["status"]==0:
 				#dprint("set_group_freepass success")
 				return True
 			else:
@@ -193,7 +197,7 @@ class N4dManager:
 		try:
 			ret=self.client.set_group_flag(self.auth,"PrintaServer",group,locked,freepass)
 		
-			if ret["status"]:
+			if ret["status"]==0:
 				#dprint("set_group_flag success")
 				return True
 			else:
@@ -210,11 +214,11 @@ class N4dManager:
 		try:
 			ret=self.client.get_autorefill_options("","PrintaServer")
 			
-			if ret["status"]:
+			if ret["status"]==0:
 				#dprint("get_autorefill_options success")
 				#Fix period from seconds to days
-				ret["msg"]["period"]=ret["msg"]["period"]/(24*60*60)
-				return ret["msg"]
+				ret["return"]["period"]=ret["return"]["period"]/(24*60*60)
+				return ret["return"]
 			else:
 				dprint("get_autorefill_options failed: %e"%ret["msg"])
 				return None
@@ -229,7 +233,7 @@ class N4dManager:
 		try:
 			ret=self.client.set_autorefill_options(self.auth,"PrintaServer",amount,period,quota_limit)
 			
-			if ret["status"]:
+			if ret["status"]==0:
 				#dprint("set_autorefill_options success")
 				return True
 			else:
@@ -246,7 +250,7 @@ class N4dManager:
 		try:
 			ret=self.client.set_autorefill_status(self.auth,"PrintaServer",status)
 			
-			if ret["status"]:
+			if ret["status"]==0:
 				#dprint("set_autorefill_status success")
 				return True
 			else:

@@ -256,8 +256,8 @@ if __name__=="__main__":
 				ret=pb.n4d.get_request_status(info["id"])
 				dprint(ret)
 				
-				if ret["status"]:
-					current_status=ret["msg"]
+				if ret["status"]==0:
+					current_status=ret["return"]
 					
 					if current_status == "completed":
 						dprint("Got ok from client. Printing...")

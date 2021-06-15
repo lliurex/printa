@@ -56,9 +56,9 @@ class PrintaPrinterConfig:
 	def get_n4d_ticket(self):
 		
 		self.n4d_ticket=None
-		ret=self.n4d.create_ticket("","NTicketsManager",self.user)
+		ret=self.n4d.create_ticket(self.user)
 
-		if ret:
+		if ret["status"]==0:
 			f=open("/run/n4d/tickets/%s"%self.user)
 			self.n4d_ticket=f.readline().strip("\n")
 			f.close()
@@ -116,11 +116,11 @@ class PrintaPrinterConfig:
 			self.states={}
 		
 		ret=self.n4d.get_controlled_printers("","PrintaServer")
-		if ret["status"]:
-			controlled=ret["msg"]
+		if ret["status"]==0:
+			controlled=ret["return"]
 		ret=self.n4d.get_non_controlled_printers("","PrintaServer")
-		if ret["status"]:
-			non_controlled=ret["msg"]
+		if ret["status"]==0:
+			non_controlled=ret["return"]
 		
 		for printer in controlled:
 			self.printers_store.append([printer,True])
@@ -177,10 +177,10 @@ class PrintaPrinterConfig:
 				else:
 					ret=self.n4d.disable_control((self.user,self.n4d_ticket),"PrintaServer",printer)					
 				
-				if ret["status"]:
+				if ret["status"]==0:
 					self.states[printer]=status
 				
-				if not ret["status"]:
+				else:
 					failed=True
 					dialog = Gtk.MessageDialog(None, 0, Gtk.MessageType.ERROR, Gtk.ButtonsType.CANCEL, _("Error executing command:")+" %s"%ret["msg"])
 					dialog.format_secondary_text(str(ret))
