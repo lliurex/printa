@@ -1,0 +1,108 @@
+printa (1:0.5) focal; urgency=medium
+
+  * First focal release
+  * n4d > 0.900 port
+
+ -- Hector Garcia Huerta <hectorgh@gmail.com>  Tue, 15 Jun 2021 10:42:00 +0200
+
+printa (1:0.4.3) bionic-updates; urgency=medium
+
+  * Adding Quota limit
+
+ -- Daniel Duran <daduve@gmail.com>  Fri, 19 Feb 2021 20:50:12 +0100
+
+printa (1:0.4.2) bionic; urgency=medium
+
+  * Using codecs library to open files in utf-8 mode
+
+ -- Hector Garcia Huerta <hectorgh@gmail.com>  Wed, 23 Dec 2020 08:39:32 +0100
+
+printa (1:0.4.1) bionic; urgency=medium
+
+  * Trying to fix utf-8 job name saving in history file
+  * printa-client: if ticket is invalid, it gets deleted 
+
+ -- Hector Garcia Huerta <hectorgh@gmail.com>  Mon, 21 Dec 2020 20:29:07 +0100
+
+printa (1:0.4) bionic; urgency=medium
+
+  * Fixed commit_request for every user
+  * Added system-config-printer dependency
+
+ -- Hector Garcia Huerta <hectorgh@gmail.com>  Mon, 21 Dec 2020 19:37:23 +0100
+
+printa (1:0.3.9) bionic; urgency=medium
+
+  * Adding Desktops translations 
+
+ -- Daniel Duran <daduve@gmail.com>  Wed, 22 Jul 2020 19:42:25 +0200
+
+printa (1:0.3.8) bionic; urgency=medium
+
+  * Pofiles to common data
+
+ -- Hector Garcia Huerta <hectorgh@gmail.com>  Wed, 22 Jul 2020 11:28:47 +0200
+
+printa (1:0.3.5) bionic; urgency=medium
+
+  * Adding translations 
+
+ -- Daniel Duran <daduve@gmail.com>  Wed, 22 Jul 2020 04:26:51 +0200
+
+printa (1:0.3.4) bionic; urgency=medium
+
+  * Adding GUI translations 
+
+ -- Daniel Duran <daduve@gmail.com>  Wed, 22 Jul 2020 02:21:20 +0200
+
+printa (1:0.3.3) bionic; urgency=high
+
+  * Adding translations to desktops"
+
+ -- Daniel Duran <daduve@gmail.com>  Tue, 21 Jul 2020 20:48:44 +0200
+
+printa (1:0.3.2) bionic; urgency=medium
+
+  * Fixed printa-printer-config desktop file
+
+ -- Hector Garcia Huerta <hectorgh@gmail.com>  Mon, 06 Jul 2020 09:16:01 +0200
+
+printa (1:0.3.1) bionic; urgency=medium
+
+  * Fixed login image
+
+ -- Hector Garcia Huerta <hectorgh@gmail.com>  Thu, 11 Jun 2020 14:04:24 +0200
+
+printa (1:0.3) bionic; urgency=medium
+
+  * Added token logic to printa-client
+  * Fixed printa-users-manager link
+  * Added desktop files
+  * Added printa-common-data package
+
+ -- Hector Garcia Huerta <hectorgh@gmail.com>  Thu, 04 Jun 2020 12:34:41 +0200
+
+printa (1:0.2) bionic; urgency=medium
+
+  * Added links to /usr/bin
+  * Added xdg autostart for printa-client GUI
+
+ -- Hector Garcia Huerta <hectorgh@gmail.com>  Wed, 03 Jun 2020 14:03:21 +0200
+
+printa (1:0.1.2) bionic; urgency=medium
+
+  * Fixed missing install file for printa-client
+
+ -- Hector Garcia Huerta <hectorgh@gmail.com>  Wed, 03 Jun 2020 13:01:01 +0200
+
+printa (1:0.1.1) bionic; urgency=medium
+
+  * Fixed rsrc paths
+
+ -- Hector Garcia Huerta <hectorgh@gmail.com>  Wed, 03 Jun 2020 12:57:53 +0200
+
+printa (1:0.1) bionic; urgency=medium
+
+  * Initial release. (Closes: #XXXXXX)
+
+ -- Hector Garcia Huerta <hectorgh@gmail.com>  Wed, 03 Jun 2020 11:55:08 +0200

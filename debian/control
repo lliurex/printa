@@ -1,0 +1,52 @@
+Source: printa
+Section: admin
+Priority: optional
+Maintainer: Equipo LliureX <lliurex@gva.es>
+Uploaders:Raul Rodrigo Segura <lliurex_devel3@edu.gva.es>,  David Montalva Furio <montalva_dav@gva.es>, Hector Garcia Huerta <lliurex_devel1@edu.gva.es>, Daniel Duran Vecino <daduve@gmail.com>, M.Angel Juan <m.angel.juan@gmail.com>
+Build-Depends:debhelper (>= 9), llxsrchelper, python3-poinstaller, zero-dev
+Standards-Version: 3.9.5
+
+Package: printa-backend
+Architecture: all
+Depends: ${misc:Depends}, python3, n4d-printa-server, cups-daemon
+Description: Printa cups backend
+ Printa backend to manage printing
+
+Package: n4d-printa-server
+Architecture: all
+Depends: ${misc:Depends}, n4d, python-cups
+Description: N4d Printa server plugin
+ Plugin to manage printa queries
+
+Package: n4d-printa-client
+Architecture: all
+Depends: ${misc:Depends}, n4d
+Description: N4d Printa client plugin
+ Plugin to manage changes in printa server plugin
+
+Package: printa-client
+Architecture: all
+Depends: ${misc:Depends}, python3,printa-common-data
+Description: Printa client GUI
+ Printa gui managing user printing
+
+Package: printa-printer-config
+Architecture: all
+Depends: ${misc:Depends}, python3, printa-common-data, system-config-printer
+Description: Printa printer configuration GUI
+ Printa GUI to control printers in the system
+
+Package: printa-users-manager
+Architecture: all
+Depends: ${misc:Depends}, python3, printa-common-data
+Description: Printa users manager GUI
+ Printa gui to manage Printa user accounts
+
+Package: printa-common-data
+Architecture: all
+Conflicts: printa-users-manager (<<1:0.3.8)
+Breaks: printa-users-manager (<<1:0.3.8)
+Replaces: printa-users-manager (<<1:0.3.8)
+Description: Printa common files
+ Package containing Printa common files
+

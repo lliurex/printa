@@ -1,0 +1,23 @@
+#!/bin/sh
+
+set -e
+
+
+case $1 in 
+
+        configure)
+
+		n4d-modules enable-plugin /etc/n4d/conf.d/PrintaServer || true
+
+                ;;
+	   abort-upgrade|abort-remove|abort-deconfigure)
+			   ;;
+        *)
+                echo "Nothing to do"
+                ;; 
+esac
+
+#DEBHELPER#
+
+exit 0
+
