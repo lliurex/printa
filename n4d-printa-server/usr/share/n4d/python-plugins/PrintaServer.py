@@ -235,7 +235,7 @@ class PrintaServer:
 			
 			return True
 		except Exception as e:
-			print e 
+			print(e)
 			self.saving_history=False
 			return False
 		
