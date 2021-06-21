@@ -16,7 +16,7 @@ from gi.repository import Gtk
 
 RSRC_PATH="/usr/share/printa-users-manager/rsrc/"
 
-DEBUG=False
+DEBUG=True
 
 def dprint(data):
 	
@@ -132,10 +132,11 @@ class N4dLogin:
 		try:
 			ret=self.client.validate_user(u,p)
 			status=ret["status"]
-			groups=ret["return"]
+			
+			
 			dprint(ret)
 			if status==0:
-				
+				groups=ret["return"][1]
 				if len(self.valid_groups)>0:
 					for g in groups:
 						if g in self.valid_groups:

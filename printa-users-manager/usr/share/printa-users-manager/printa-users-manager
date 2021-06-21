@@ -131,19 +131,19 @@ class PrintaManager:
 		self.um_name_entry=builder.get_object("um_name_entry")
 		self.um_quota_spinbutton=builder.get_object("um_quota_spinbutton")
 		
-		adjustment=Gtk.Adjustment(0,0,1000,1,10,0)
+		adjustment=Gtk.Adjustment(value=0,lower=0,upper=1000,step_increment=1,page_increment=10,page_size=0)
 		self.um_quota_spinbutton.set_adjustment(adjustment)
-		adjustment=Gtk.Adjustment(0,0,1000,1,10,0)
+		adjustment=Gtk.Adjustment(value=0,lower=0,upper=1000,step_increment=1,page_increment=10,page_size=0)
 		self.go_new_quota_sb.set_adjustment(adjustment)
-		adjustment=Gtk.Adjustment(0,-1000,1000,1,10,0)
+		adjustment=Gtk.Adjustment(value=0,lower=-1000,upper=1000,step_increment=1,page_increment=10,page_size=0)
 		self.go_add_quota_sb.set_adjustment(adjustment)
-		adjustment=Gtk.Adjustment(0,0,12,1,10,0)
+		adjustment=Gtk.Adjustment(value=0,lower=0,upper=12,step_increment=1,page_increment=10,page_size=0)
 		self.ao_months_sb.set_adjustment(adjustment)
-		adjustment=Gtk.Adjustment(0,0,30,1,10,0)
+		adjustment=Gtk.Adjustment(value=0,lower=0,upper=30,step_increment=1,page_increment=10,page_size=0)
 		self.ao_days_sb.set_adjustment(adjustment)
-		adjustment=Gtk.Adjustment(0,-1000,1000,1,10,0)
+		adjustment=Gtk.Adjustment(value=0,lower=-1000,upper=1000,step_increment=1,page_increment=10,page_size=0)
 		self.ao_amount_sb.set_adjustment(adjustment)
-		adjustment=Gtk.Adjustment(0,0,100000,1,10,0)
+		adjustment=Gtk.Adjustment(value=0,lower=0,upper=100000,step_increment=1,page_increment=10,page_size=0)
 		self.ao_quota_limit.set_adjustment(adjustment)
 		
 		self.main_stack=Gtk.Stack()
@@ -195,7 +195,6 @@ class PrintaManager:
 	
 	def run(self):
 		
-		GObject.threads_init()
 		Gtk.main()
 		
 	#def run
