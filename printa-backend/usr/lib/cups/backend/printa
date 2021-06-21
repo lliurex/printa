@@ -4,7 +4,7 @@ import sys
 import os
 import time
 import subprocess
-import imp
+import importlib.machinery
 import syslog
 import random
 import multiprocessing
@@ -43,7 +43,7 @@ class PrintaBackend:
 			os.system("mkdir %s"%RUN_PATH)
 			os.mkdir(RUN_PATH)
 		
-		N4dManager=imp.load_source("N4dManager","/usr/share/printa/N4dManager.py")		
+		N4dManager=importlib.machinery.SourceFileLoader("N4dManager","/usr/share/printa/N4dManager.py")	.load_module()	
 		self.n4d=N4dManager.N4dManager()
 		
 	#def __init__
@@ -287,7 +287,7 @@ if __name__=="__main__":
 			
 		dprint("Done")
 		
-	except Expcetion as e:
+	except Exception as e:
 		dprint("STEP ERROR")
 		dprint(e)
 		

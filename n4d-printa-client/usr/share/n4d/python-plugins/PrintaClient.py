@@ -19,7 +19,7 @@ class PrintaClient:
 		
 	def startup(self,options):
 		
-		self.core.register_variable_trigger("PRINTAREQUESTS","PrintaClient",self.shutdowner_trigger)
+		print(self.core.register_variable_trigger("PRINTAREQUESTS","PrintaClient",self.request_trigger))
 		t=threading.Thread(target=self._startup)
 		t.daemon=True
 		t.start()
@@ -30,9 +30,11 @@ class PrintaClient:
 	def _startup(self):
 		
 		tries=3
+		self.printa_server=None
 		for x in range(0,tries):
 			
 			ret=self.core.get_variable("PRINTASERVER")
+			print(ret)
 			if ret==0:
 				self.printa_server=ret["return"]
 				if self.printa_server!=None:
@@ -67,6 +69,7 @@ class PrintaClient:
 		
 		if value!=None:
 			ip=self._get_own_ip()
+			print(ip)
 			#print ip,value.keys()
 			if ip in value:
 				for user in value[ip]:

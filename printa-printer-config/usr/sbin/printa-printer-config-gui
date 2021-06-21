@@ -116,6 +116,7 @@ class PrintaPrinterConfig:
 			self.states={}
 		
 		ret=self.n4d.get_controlled_printers("","PrintaServer")
+		print(ret)
 		if ret["status"]==0:
 			controlled=ret["return"]
 		ret=self.n4d.get_non_controlled_printers("","PrintaServer")
@@ -182,9 +183,11 @@ class PrintaPrinterConfig:
 				
 				else:
 					failed=True
-					dialog = Gtk.MessageDialog(None, 0, Gtk.MessageType.ERROR, Gtk.ButtonsType.CANCEL, _("Error executing command:")+" %s"%ret["msg"])
+					dialog = Gtk.MessageDialog(parent=None, flags=0, message_type=Gtk.MessageType.ERROR, buttons=Gtk.ButtonsType.CANCEL, text=_("Error executing command:")+" %s"%ret["msg"])
 					dialog.format_secondary_text(str(ret))
 					dialog.run()
+					dialog.close()
+					
 					
 		if not failed:
 			self.apply_button.set_sensitive(False)
@@ -202,9 +205,14 @@ class PrintaPrinterConfig:
 				
 				if show_dialog:
 					
-					dialog = Gtk.MessageDialog(self.window,0, Gtk.MessageType.WARNING,(Gtk.STOCK_APPLY, Gtk.ResponseType.OK,Gtk.STOCK_DISCARD,Gtk.ResponseType.CLOSE,Gtk.STOCK_CANCEL,Gtk.ResponseType.CANCEL),_("Configuration has changed"))
+					dialog = Gtk.MessageDialog(parent=self.window,flags=0, message_type=Gtk.MessageType.WARNING,text=_("Configuration has changed"))
+					dialog.add_buttons(Gtk.STOCK_APPLY, Gtk.ResponseType.OK,Gtk.STOCK_DISCARD,Gtk.ResponseType.CLOSE,Gtk.STOCK_CANCEL,Gtk.ResponseType.CANCEL)
 					dialog.format_secondary_text(_("Do you want to apply changes or discard them?"))
 					
+					
+					# DEPRECATION WARNING. GNOME WANTS ICONLESS DIALOGS
+					
+					'''
 					# SET BREEZE ICON IF POSSIBLE
 					breeze_icon_path="/usr/share/icons/breeze/status/64/dialog-warning.svg"
 					if os.path.exists(breeze_icon_path):
@@ -212,13 +220,16 @@ class PrintaPrinterConfig:
 						image.set_from_file(breeze_icon_path)
 						image.show()
 						dialog.set_image(image)
-
+					'''
+					
+					'''
 					# HACK TO SHOW THE CORRECT ICON
 					bbox=dialog.get_children()[0].get_children()[1].get_children()[0]
 					discard_button=bbox.get_children()[1]
 					button_image,button_label=discard_button.get_children()[0].get_children()[0].get_children()
 					button_image.set_from_stock(Gtk.STOCK_DELETE,Gtk.IconSize.BUTTON)
 					# ###### #
+					'''
 					
 					ret=dialog.run()
 					dialog.hide()

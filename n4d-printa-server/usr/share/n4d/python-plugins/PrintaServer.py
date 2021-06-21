@@ -228,14 +228,14 @@ class PrintaServer:
 			self.saving_history=True
 			tmp,filename=tempfile.mkstemp()
 			f = codecs.open(filename,'w',"utf-8")
-			json.dump(data,f,indent=4,encoding="utf-8", ensure_ascii=False)			
+			json.dump(data,f,indent=4,ensure_ascii=False)			
 			f.close()
 			shutil.copy(filename,self.history_file)
 			self.saving_history=False
 			
 			return True
 		except Exception as e:
-			print e 
+			print(e)
 			self.saving_history=False
 			return False
 		
@@ -753,8 +753,8 @@ class PrintaServer:
 		t=info["job_info"]["time"]
 		estimated_pages=self._get_job_pages(info["job_info"])
 		info["job_info"]["estimated_pages"]=estimated_pages
-		
-		client=xmlrpclib.ServerProxy("https://%s:9779"%printa_backend_ip)
+		context=ssl._create_unverified_context()
+		client=xmlrpc.client.ServerProxy("https://%s:9779"%printa_backend_ip,context=context)
 		try:
 
 			cret=client.validate_request("","PrintaServer",id,t)["return"]
