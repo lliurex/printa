@@ -7,7 +7,7 @@ case $1 in
 
         configure)
 
-		n4d-modules enable-plugin /etc/n4d/conf.d/PrintaServer || true
+		n4d-modules enable-plugin /etc/n4d/conf.d/PrintaServer.json || true
 
                 ;;
 	   abort-upgrade|abort-remove|abort-deconfigure)
