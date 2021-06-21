@@ -1,3 +1,10 @@
+printa (1:0.6) focal; urgency=medium
+
+  * python2 to python 3 fixes
+  * n4d legacy to n4d > 0.900 fixes
+
+ -- Hector Garcia Huerta <hectorgh@gmail.com>  Mon, 21 Jun 2021 17:01:12 +0200
+
 printa (1:0.5.1) focal; urgency=medium
 
   * Fixed python3-cups dependency 
