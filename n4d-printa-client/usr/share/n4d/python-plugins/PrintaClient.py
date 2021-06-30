@@ -19,7 +19,7 @@ class PrintaClient:
 		
 	def startup(self,options):
 		
-		print(self.core.register_variable_trigger("PRINTAREQUESTS","PrintaClient",self.request_trigger))
+		self.core.register_variable_trigger("PRINTAREQUESTS","PrintaClient",self.request_trigger)
 		t=threading.Thread(target=self._startup)
 		t.daemon=True
 		t.start()
@@ -34,7 +34,6 @@ class PrintaClient:
 		for x in range(0,tries):
 			
 			ret=self.core.get_variable("PRINTASERVER")
-			print(ret)
 			if ret==0:
 				self.printa_server=ret["return"]
 				if self.printa_server!=None:
