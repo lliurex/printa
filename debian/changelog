@@ -1,3 +1,9 @@
+printa (1:0.7) focal; urgency=medium
+
+  * Removed debug prints
+
+ -- Hector Garcia Huerta <hectorgh@gmail.com>  Wed, 30 Jun 2021 14:34:33 +0200
+
 printa (1:0.6) focal; urgency=medium
 
   * python2 to python 3 fixes
