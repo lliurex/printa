@@ -1,3 +1,9 @@
+printa (1:0.7.1) focal; urgency=medium
+
+  * Fixed syntax error in printa-client
+
+ -- Hector Garcia Huerta <hectorgh@gmail.com>  Thu, 01 Jul 2021 10:20:10 +0200
+
 printa (1:0.7) focal; urgency=medium
 
   * Removed debug prints
