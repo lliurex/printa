@@ -138,7 +138,7 @@ class PrintaClient:
 		context=ssl._create_unverified_context()
 		c=xmlrpc.client.ServerProxy("https://localhost:9779",allow_none=True,context=context)
 		ret=c.get_variable("PRINTASERVER")
-		if ret["status"]==0
+		if ret["status"]==0:
 			if ret["return"]!=None:
 				return ret["return"]
 		return "127.0.0.1"
