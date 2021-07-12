@@ -116,9 +116,13 @@ class PrintaPrinterConfig:
 			self.states={}
 		
 		ret=self.n4d.get_controlled_printers("","PrintaServer")
-		print(ret)
+		
+		controlled=[]
+		non_controlled=[]
+		
 		if ret["status"]==0:
 			controlled=ret["return"]
+		
 		ret=self.n4d.get_non_controlled_printers("","PrintaServer")
 		if ret["status"]==0:
 			non_controlled=ret["return"]
