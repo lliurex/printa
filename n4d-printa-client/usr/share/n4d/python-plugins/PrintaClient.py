@@ -34,7 +34,7 @@ class PrintaClient:
 		for x in range(0,tries):
 			
 			ret=self.core.get_variable("PRINTASERVER")
-			if ret==0:
+			if ret["status"]==0:
 				self.printa_server=ret["return"]
 				if self.printa_server!=None:
 					break
@@ -45,7 +45,7 @@ class PrintaClient:
 		
 		if self.printa_server==None:
 			self.printa_server="127.0.0.1"
-		
+			
 	#def startup
 
 	
@@ -58,33 +58,30 @@ class PrintaClient:
 			s.connect((self.printa_server,9779))
 			ip,port=s.getsockname()
 		except Exception as e:
-			print(e)
+			pass
 			
 		return ip
 		
 	#def _get_own_ip
 	
 	def request_trigger(self,value):
-		
+
 		if value!=None:
 			ip=self._get_own_ip()
-			print(ip)
-			#print ip,value.keys()
 			if ip in value:
 				for user in value[ip]:
 					try:
 						user_data=pwd.getpwnam(user)
 						user_path="/run/user/%s/printa/printa_client"%user_data.pw_uid
 						if os.path.exists(user_path):
-							print("UPDATING %s TOKEN..."%user)
+							#print("UPDATING %s TOKEN..."%user)
 							f=open(user_path,"w")
 							f.write(str(time.time()))
 							f.close()
 					except Exception as e:
 						print(e)
-						
+		
 		return n4d.responses.build_successful_call_response()
-			
 		
 	#def request_trigger
 	
