@@ -1,3 +1,11 @@
+printa (1:0.9) focal; urgency=medium
+
+  * Fixed get_autorefill_options function
+  * Fixed printa-users-manager login function
+  * fixed printaclient trigger function
+
+ -- Hector Garcia Huerta <hectorgh@gmail.com>  Tue, 13 Jul 2021 17:50:09 +0200
+
 printa (1:0.8) focal; urgency=medium
 
   * printa-printer-config : fixed empty controlled/non_controlled list
