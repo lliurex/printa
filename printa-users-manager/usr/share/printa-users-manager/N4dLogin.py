@@ -147,9 +147,11 @@ class N4dLogin:
 					ret["status"]=True
 			else:
 				ret["msg"]="User and/or password error"
+				ret["status"]=False
 		except Exception as e:
 			print(e)
 			ret["msg"]=str(e)
+			ret["status"]=False
 			
 		return ret
 		
