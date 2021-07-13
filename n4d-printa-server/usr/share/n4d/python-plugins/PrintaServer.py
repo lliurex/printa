@@ -378,7 +378,7 @@ class PrintaServer:
 	
 	def get_autorefill_options(self):
 		
-		return n4d.build_successful_call_response(self.db["autorefill"])
+		return n4d.responses.build_successful_call_response(self.db["autorefill"])
 		#return {"status": True, "msg": self.db["autorefill"]}
 		
 	#def get_autorefill_options
