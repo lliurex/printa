@@ -111,7 +111,7 @@ class N4dLogin:
 	def read_ticket_from_server(self,u,p):
 		try:
 			dprint("Reading remote ticket...")
-			ret=self.get_ticket(u,p)
+			ret=self.client.get_ticket(u,p)
 			if ret["status"]==0:
 				t=ret["return"]
 				remote_ticket_path="/run/user/%s/printa/%s.n4d"%(self.uid,self.user)
