@@ -24,7 +24,7 @@ class N4dManager:
 		self.printa_server="localhost"
 		
 		if ret["status"]==0 and ret["return"]!=None:
-			self.printa_server=var
+			self.printa_server=ret["return"]
 		else:
 			self.printa_server="127.0.0.1"
 		
