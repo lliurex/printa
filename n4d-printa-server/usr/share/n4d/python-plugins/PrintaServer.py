@@ -864,7 +864,7 @@ class PrintaServer:
 		try:
 			con=cups.Connection()
 			printers=con.getPrinters()
-			return n4d.responses.build_successful_call_response(printer)
+			return n4d.responses.build_successful_call_response(printers)
 			#return {"status":True,"msg":printers}
 		except Exception as e:
 			return n4d.responses.build_failed_call_response(PrintaServer.GET_PRINTERS_ERROR,str(e))
