@@ -1,3 +1,11 @@
+printa (1:0.10) focal; urgency=medium
+
+  * Fixed printa-client.n4dmanager.get_ticket function
+  * Fixed PrintaServer.get_printers function
+  * Fixed printa.n4dmanager.get_service_variables function
+
+ -- Hector Garcia Huerta <hectorgh@gmail.com>  Wed, 14 Jul 2021 17:36:44 +0200
+
 printa (1:0.9) focal; urgency=medium
 
   * Fixed get_autorefill_options function
