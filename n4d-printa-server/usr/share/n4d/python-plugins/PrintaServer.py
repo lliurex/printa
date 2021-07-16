@@ -917,7 +917,7 @@ class PrintaServer:
 		if printer_name not in controlled_printers:
 			ret = self.get_non_controlled_printers()
 			if ret:
-				current_devices = ret["msg"]
+				current_devices = ret["return"]
 			else:
 				return n4d.responses.build_failed_call_response(PrintaServer.UNKNOWN_PRINTER_ERROR,"Unknown printer")
 				
