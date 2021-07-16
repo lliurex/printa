@@ -15,7 +15,7 @@ SYSLOG=True
 CUPS_BACKEND_PATH="/usr/lib/cups/backend/"
 CUPS_POOL_PATH="/var/spool/cups/"
 RUN_PATH="/run/printa/"
-PRINT_TIMEOUT=10
+PRINT_TIMEOUT=30
 
 def dprint(msg):
 	
