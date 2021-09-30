@@ -12,6 +12,7 @@ import os
 import shutil
 import threading
 import codecs
+import multiprocessing
 
 import n4d.server.core
 import n4d.responses
@@ -45,7 +46,7 @@ class PrintaServer:
 		self.default_user_quota=200
 		self.default_printer_quota=6000
 		self._check_history_file()
-		self.autorefill_thread=threading.Thread()
+		self.autorefill_thread=multiprocessing.Process()
 		self.autorefill_thread_working=False
 		self.core=n4d.server.core.Core.get_core()
 		
@@ -266,7 +267,7 @@ class PrintaServer:
 		
 		if not self.autorefill_thread.is_alive():
 			if self.db["autorefill"]["enabled"] and self.db["autorefill"]["period"]!=0 and self.db["autorefill"]["should_set"]!=None:
-				self.autorefill_thread=threading.Thread(target=self._autorefill_loop)
+				self.autorefill_thread=multiprocessing.Process(target=self._autorefill_loop)
 				self.autorefill_thread.daemon=True
 				self.autorefill_thread.start()
 		
@@ -286,7 +287,7 @@ class PrintaServer:
 					self.autorefill_thread_working=False
 					break
 					
-			self.autorefill_thread._Thread__stop()
+			self.autorefill_thread.kill()
 			
 			if not self.autorefill_thread.is_alive():
 				print("[PrintaServer] Autorefill thread stopped")
