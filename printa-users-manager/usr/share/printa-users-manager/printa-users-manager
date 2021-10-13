@@ -442,9 +442,7 @@ class PrintaManager:
 		period=self.ao_options["period"]
 		amount=self.ao_options["amount"]
 		last_set=self.ao_options["last_set"]
-		if "quota_limit" in self.ao_options:
-			quota_limit=self.ao_options["quota_limit"]
-		else:
+		if "quota_limit" not in self.ao_options:
 			self.ao_options["quota_limit"]=AUTOREFILL_QUOTA_LIMIT
 		
 		if period!=0:
@@ -457,7 +455,7 @@ class PrintaManager:
 		self.ao_days_sb.set_value(days)
 		
 		self.ao_amount_sb.set_value(amount)
-		self.ao_quota_limit.set_value(quota_limit)
+		self.ao_quota_limit.set_value(self.ao_options["quota_limit"])
 		
 		label_str=""
 		if last_set!=None:
