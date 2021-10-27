@@ -12,7 +12,7 @@ import os
 import shutil
 import threading
 import codecs
-import multiprocessing
+import threading
 
 import n4d.server.core
 import n4d.responses
@@ -35,6 +35,8 @@ class PrintaServer:
 	PRINTER_ALREADY_CONTROLLED_ERROR=-60
 	PRINTER_NOT_CONTROLLED_ERROR=-70
 	UNKNOWN_USER_ERROR=-80
+	
+	THREAD_LATENCY=10
 	
 	def __init__(self):
 		
@@ -267,7 +269,7 @@ class PrintaServer:
 		
 		if not self.autorefill_thread.is_alive():
 			if self.db["autorefill"]["enabled"] and self.db["autorefill"]["period"]!=0 and self.db["autorefill"]["should_set"]!=None:
-				self.autorefill_thread=multiprocessing.Process(target=self._autorefill_loop)
+				self.autorefill_thread=threading.Thread(target=self._autorefill_loop)
 				self.autorefill_thread.daemon=True
 				self.autorefill_thread.start()
 		
@@ -287,7 +289,7 @@ class PrintaServer:
 					self.autorefill_thread_working=False
 					break
 					
-			self.autorefill_thread.kill()
+			#self.autorefill_thread.kill()
 			
 			if not self.autorefill_thread.is_alive():
 				print("[PrintaServer] Autorefill thread stopped")
@@ -327,9 +329,9 @@ class PrintaServer:
 				self.autorefill_thread_working=False
 				
 			else:
-				sleep_time=self.db["autorefill"]["should_set"]  - current_time
-				print("[PrintaServer] Autorefill is sleeping for %s secs until %s"%(sleep_time,self._format_time(self.db["autorefill"]["should_set"])))
-				time.sleep(sleep_time)
+				#sleep_time=self.db["autorefill"]["should_set"]  - current_time
+				#print("[PrintaServer] Autorefill is sleeping for %s secs until %s"%(sleep_time,self._format_time(self.db["autorefill"]["should_set"])))
+				time.sleep(PrintaServer.THREAD_LATENCY)
 		
 	#def _autorefill_loop
 	
@@ -393,10 +395,7 @@ class PrintaServer:
 			self.db["autorefill"]["should_set"]=current_time+self.db["autorefill"]["period"]
 		self.save_db_variable()
 		
-		if not status:
-			self._kill_autorefill_loop()
-		else:
-			self._start_autorefill_loop()
+		# Thread kill was here. It should die on its own now
 		
 		return n4d.responses.build_successful_call_response()
 		#return {"status":True,"msg":""}
@@ -415,9 +414,9 @@ class PrintaServer:
 				self.db["autorefill"]["group_filter"]=group_filter
 			self.db["autorefill"]["should_set"]=self.db["autorefill"]["last_set"]+self.db["autorefill"]["period"]
 			self.save_db_variable()
-			
-			if restart:
-				self._restart_autorefill_loop()
+
+			# Thread restart was here. There is no need now as it only sleeps PrintaServer.LATENCY_THREAD seconds before
+			# checking current time again
 		
 			return n4d.responses.build_sucessful_call_response()
 			#return {"status": True, "msg": ""}
