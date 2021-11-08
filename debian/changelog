@@ -1,3 +1,9 @@
+printa (1:0.13.1) focal; urgency=medium
+
+  * Fixed old multiprocess instance
+
+ -- Hector Garcia Huerta <hectorgh@gmail.com>  Mon, 08 Nov 2021 10:16:02 +0100
+
 printa (1:0.13) focal; urgency=medium
 
   * Back to threading. It uses thread_latency variable to sleep instead of
