@@ -48,7 +48,7 @@ class PrintaServer:
 		self.default_user_quota=200
 		self.default_printer_quota=6000
 		self._check_history_file()
-		self.autorefill_thread=multiprocessing.Process()
+		self.autorefill_thread=threading.Thread()
 		self.autorefill_thread_working=False
 		self.core=n4d.server.core.Core.get_core()
 		
