@@ -1,3 +1,9 @@
+printa (1:0.14) focal; urgency=medium
+
+  * Fixed copies being multiplied twice
+
+ -- Hector Garcia Huerta <hectorgh@gmail.com>  Wed, 17 Nov 2021 10:57:29 +0100
+
 printa (1:0.13.1) focal; urgency=medium
 
   * Fixed old multiprocess instance
