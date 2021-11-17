@@ -133,7 +133,7 @@ class PrintaBackend:
 				info["origin"]="127.0.0.1"
 			
 			try:
-				info["pages"]=self.get_pages(info["job"])*info["copies"]
+				info["pages"]=self.get_pages(info["job"])
 			except Exception as e:
 				dprint(e)
 				info["pages"]=1
