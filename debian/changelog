@@ -1,4 +1,4 @@
-printa (1:0.5) bionic; urgency=medium
+printa (1:0.5.19) bionic; urgency=medium
 
   * Fixed copies being multiplied twice
 
