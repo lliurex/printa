@@ -56,14 +56,10 @@ class PrintaServer:
 	
 	def startup(self,options):
 
-		self.requests_variable=self.core.get_variable("PRINTAREQUESTS")["return"]
 
-		if self.requests_variable == None:
-			self.requests_variable = {}
-			self.core.set_variable("PRINTAREQUESTS",self.requests_variable,{"info":"Printa current requests - Volatile","volatile":True})
+		self._get_printarequests_variable_thread()
 		
 		self.db=self.core.get_variable("PRINTADB")["return"]
-		
 		if self.db == None:
 			self.db = {}
 			self.db["users"]={}
@@ -86,6 +82,34 @@ class PrintaServer:
 	# ##################################### #
 	#	PRIVATE FUNCTIONS		#
 	# ##################################### #	
+
+	def _get_printarequests_variable_thread(self):
+		
+		t=threading.Thread(target=self._get_printarequests_variable)
+		t.daemon = True
+		t.start()
+		
+	#def get_printarequests_variable
+	
+	def _get_printarequests_variable(self):
+
+		tries=10
+		# this might be executed in a classroom client. It might need a few tries on boot
+		for x in range(0,tries):
+			self.requests_variable=self.core.get_variable("PRINTAREQUESTS")["return"]
+			if self.requests_variable != None:
+				return True
+			else:
+				time.sleep(1)
+				
+		if self.requests_variable == None:
+			self.requests_variable = {}
+			self.core.set_variable("PRINTAREQUESTS",self.requests_variable,{"info":"Printa current requests - Volatile","volatile":True})
+
+		return True
+		
+	#def _get_printarequests_variable
+
 	
 	def _add_user(self,username):
 		
