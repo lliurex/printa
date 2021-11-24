@@ -1,3 +1,9 @@
+printa (1:0.5.20) bionic; urgency=medium
+
+  * Added PRINTAREQUEST read retries on boot in case it's a classroom client
+
+ -- Hector Garcia Huerta <hectorgh@gmail.com>  Wed, 24 Nov 2021 13:49:24 +0100
+
 printa (1:0.5.19) bionic; urgency=medium
 
   * Fixed copies being multiplied twice
