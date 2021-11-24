@@ -56,7 +56,6 @@ class PrintaServer:
 	
 	def startup(self,options):
 
-
 		self._get_printarequests_variable_thread()
 		
 		self.db=self.core.get_variable("PRINTADB")["return"]
