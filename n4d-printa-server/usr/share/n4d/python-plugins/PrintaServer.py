@@ -31,7 +31,7 @@ class PrintaServer:
 	
 	def startup(self,options):
 
-		self.get_printarequests_variable()
+		self._get_printarequests_variable_thread()
 		
 		self.db=copy.deepcopy(objects["VariablesManager"].get_variable("PRINTADB"))
 		
@@ -53,14 +53,18 @@ class PrintaServer:
 			self._start_autorefill_loop()
 		
 	#def startup
+
+	# ##################################### #
+	#	PRIVATE FUNCTIONS		#
+	# ##################################### #
 	
-	def get_printarequests_variable(self):
+	def _get_printarequests_variable_thread(self):
 		
 		t=threading.Thread(target=self._get_printarequests_variable)
 		t.daemon = True
 		t.start()
 		
-	#def get_printarequests_variable
+	#def get_printarequests_variable_thread
 	
 	def _get_printarequests_variable(self):
 
@@ -80,10 +84,6 @@ class PrintaServer:
 		return True
 		
 	#def _get_printarequests_variable
-	
-	# ##################################### #
-	#	PRIVATE FUNCTIONS		#
-	# ##################################### #	
 	
 	def _add_user(self,username):
 		
