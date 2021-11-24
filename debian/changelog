@@ -1,3 +1,9 @@
+printa (1:0.15) focal; urgency=medium
+
+  * Added PRINTAREQUESTS read retries in case it's a classroom client
+
+ -- Hector Garcia Huerta <hectorgh@gmail.com>  Wed, 24 Nov 2021 13:50:44 +0100
+
 printa (1:0.14) focal; urgency=medium
 
   * Fixed copies being multiplied twice
