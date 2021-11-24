@@ -59,7 +59,7 @@ class PrintaClient:
 		
 		if value!=None:
 			ip=self._get_own_ip()
-			print ip,value.keys()
+			#print ip,value.keys()
 			if ip in value:
 				for user in value[ip]:
 					try:
