@@ -1,3 +1,9 @@
+printa (1:0.5.21) bionic; urgency=medium
+
+  * PRINTAREQUEST created on first request instead of on boot
+
+ -- Hector Garcia Huerta <hectorgh@gmail.com>  Fri, 26 Nov 2021 11:49:23 +0100
+
 printa (1:0.5.20) bionic; urgency=medium
 
   * Added PRINTAREQUEST read retries on boot in case it's a classroom client
