@@ -56,7 +56,11 @@ class PrintaServer:
 	
 	def startup(self,options):
 
-		self._get_printarequests_variable_thread()
+		# Do we really need to init variable this soon.
+		# It might be enough to wait for the first add_request
+		
+		#self._get_printarequests_variable_thread()
+		self.requests_variable=None
 		
 		self.db=self.core.get_variable("PRINTADB")["return"]
 		if self.db == None:
@@ -90,9 +94,8 @@ class PrintaServer:
 		
 	#def get_printarequests_variable
 	
-	def _get_printarequests_variable(self):
+	def _get_printarequests_variable(self,tries=10):
 
-		tries=10
 		# this might be executed in a classroom client. It might need a few tries on boot
 		for x in range(0,tries):
 			self.requests_variable=self.core.get_variable("PRINTAREQUESTS")["return"]
@@ -783,6 +786,8 @@ class PrintaServer:
 			cret=client.validate_request("","PrintaServer",id,t)["return"]
 			if cret:
 				
+				if self.requests_variable==None:
+					self._get_printarequests_variable(1)
 				notify_ip=self._get_notify_ip(printa_backend_ip,client_ip)
 				
 				if notify_ip not in self.requests_variable:
