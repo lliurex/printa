@@ -1,6 +1,8 @@
 import xmlrpc.client
 import ssl
 import syslog
+import socket
+import ipaddress
 
 def dprint(msg):
 	
@@ -16,6 +18,25 @@ class N4dManager:
 			self.printa_server="localhost"
 		
 	#def __init__
+	
+	def is_valid_ip(self,ip):
+		
+		try:
+			ipaddress.ip_address(ip)
+			return True
+		except:
+			return False
+		
+	#def is_valid_ip
+	
+	def get_ip_from_host(self,hostname):
+		
+		try:
+			return socket.gethostbyname(hostname)
+		except:
+			return hostname
+		
+	#def get_ip_from_host
 
 	def get_service_variables(self):
 		
@@ -25,6 +46,10 @@ class N4dManager:
 		
 		if ret["status"]==0 and ret["return"]!=None:
 			self.printa_server=ret["return"]
+			if not self.is_valid_ip(self.printa_server):
+				#we might be able to get server ip. Less prone to failure
+				# if not, we'll use previously returned value
+				self.printa_server=self.get_ip_from_host(self.printa_server)
 		else:
 			self.printa_server="127.0.0.1"
 		
